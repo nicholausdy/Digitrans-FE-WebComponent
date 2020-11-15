@@ -1,6 +1,9 @@
 import { config } from './util/config.js'
 import { FetchAPI } from './util/fetchAPI.js'
 import { URLParser } from './util/URLParser.js'
+import { FormValidator } from './util/FormValidator.js'
+
+import { Banner } from './banner.js'
 
 class LoginPage extends HTMLElement {
   constructor() {
@@ -24,55 +27,14 @@ class LoginPage extends HTMLElement {
   }  
 }
 
-class LoginHeader {
+class LoginHeader extends Banner {
   constructor(){
-    // container for header
-    const jumbotron = document.createElement('div');
-    jumbotron.setAttribute('class','jumbotron');
- 
-    const headerContainer = document.createElement('div');
-    headerContainer.setAttribute('class','container')
-     
-    //header 1st row
-    const headerRow = document.createElement('div')
-    headerRow.setAttribute('class','row text-center')
- 
-    const headerColumn = document.createElement('div')
-    headerColumn.setAttribute('class','col-md-8 mx-auto')
- 
-    const headerDisplay = document.createElement('h1')
-    headerDisplay.setAttribute('class','display-4')
- 
-    headerDisplay.textContent = 'Selamat datang di Digitrans'
- 
-    //header 2nd row
-    const headerRow2 = document.createElement('div')
-    headerRow2.setAttribute('class','row text-center mt-3')
- 
-    const headerColumn2 = document.createElement('div')
-    headerColumn2.setAttribute('class','col-md-8 mx-auto')
- 
-    const headerDisplay2 = document.createElement('h1')
-    headerDisplay2.setAttribute('class','lead')
- 
-    headerDisplay2.textContent = "Mari login untuk mulai membuat kuesioner..."
- 
-    headerColumn.appendChild(headerDisplay)
-    headerRow.appendChild(headerColumn)
-    headerContainer.appendChild(headerRow)
- 
-    headerColumn2.appendChild(headerDisplay2)
-    headerRow2.appendChild(headerColumn2)
-    headerContainer.appendChild(headerRow2)
- 
-    jumbotron.appendChild(headerContainer)
-
-    this.jumbotron = jumbotron
+    super('Selamat datang di Digitrans','Mari login untuk mulai membuat kuesioner...');
   }
 
-  static getJumbotron(){
-    const loginHeader = new LoginHeader();
-    return loginHeader.jumbotron;
+  static getJumbotron() {
+    const header = new LoginHeader();
+    return header.jumbotron;
   }
 }
 
@@ -112,6 +74,7 @@ class LoginPanel {
     usernameInputArea.setAttribute('type','email');
     usernameInputArea.setAttribute('class','form-control');
     usernameInputArea.setAttribute('id','email')
+    usernameInputArea.setAttribute('required','');
 
     usernameInputFormGroup.appendChild(usernameInputArea);
     usernameInputColumn.appendChild(usernameInputFormGroup);
@@ -129,9 +92,6 @@ class LoginPanel {
     passwordRow.appendChild(passwordColumn);
     panelBody.appendChild(passwordRow)
 
-    panel.appendChild(panelBody);
-    panelContainer.appendChild(panel);
-
     //input text password
     const passwordInputRow = document.createElement('div');
     passwordInputRow.setAttribute('class','row mt-3');
@@ -145,7 +105,8 @@ class LoginPanel {
     const passwordInputArea = document.createElement('input');
     passwordInputArea.setAttribute('type','password');
     passwordInputArea.setAttribute('class','form-control');
-    passwordInputArea.setAttribute('id','password')
+    passwordInputArea.setAttribute('id','password');
+    passwordInputArea.setAttribute('required','');
 
     passwordInputFormGroup.appendChild(passwordInputArea);
     passwordInputColumn.appendChild(passwordInputFormGroup);
@@ -189,6 +150,9 @@ class LoginPanel {
     registerColumn.appendChild(registerText);
     registerRow.appendChild(registerColumn);
     panelBody.appendChild(registerRow);
+    
+    panel.appendChild(panelBody);
+    panelContainer.appendChild(panel);
 
     this.panel = panelContainer;
   }
@@ -204,8 +168,16 @@ class LoginPanel {
       const email = shadow.getElementById('email').value;
       const password = shadow.getElementById('password').value;
       const url = config.backURL.concat('public/user/login');
+
+      if (!(email) || !(password) || !(url)) {
+        throw new Error('Ada isian yang belum diisi');
+      }
+
+      await FormValidator.validateEmail(email);
+
       const data = {email: email, password: password};
       const response = await FetchAPI.postJSON(url, data);
+      
       if (response.success) {
         localStorage.setItem('token', response.message);
         const destinationURL = await URLParser.redirectURL(window.location.href,'index.html')
@@ -214,6 +186,7 @@ class LoginPanel {
         throw new Error(response.message);
       }
     } catch (error) {
+      console.log(error)
       alert(error.message);
     }
   }
