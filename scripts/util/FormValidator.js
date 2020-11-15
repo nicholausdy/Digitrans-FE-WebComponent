@@ -13,7 +13,7 @@ class FormValidator {
     if (!(matched)) {
       throw new Error('Password Harus ada minimal 1 angka, 1 huruf kecil, 1 huruf besar, dan 8 atau lebih karakter')
     }
-    if (password != confirmPassword) {
+    if (password !== confirmPassword) {
       throw new Error('Password dan konfirmasi password tidak sama')
     }
   }
