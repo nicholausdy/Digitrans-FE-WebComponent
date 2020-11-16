@@ -29,7 +29,7 @@ class LoginPage extends HTMLElement {
 
 class LoginHeader extends Banner {
   constructor(){
-    super('Selamat datang di Digitrans','Mari login untuk mulai membuat kuesioner...');
+    super('Selamat datang di Digitrans','Mari masuk untuk mulai membuat kuesioner...');
   }
 
   static getJumbotron() {
@@ -54,7 +54,7 @@ class LoginPanel {
     usernameRow.setAttribute('class','row mt-3');
 
     const usernameColumn = document.createElement('div');
-    usernameColumn.setAttribute('class', 'col w-100 mx-auto');
+    usernameColumn.setAttribute('class', 'col w-100 mx-auto text-left');
 
     usernameColumn.innerHTML = '<b>Email</b>'
     usernameRow.appendChild(usernameColumn);
@@ -86,7 +86,7 @@ class LoginPanel {
     passwordRow.setAttribute('class','row');
 
     const passwordColumn = document.createElement('div');
-    passwordColumn.setAttribute('class', 'col w-100 mx-auto');
+    passwordColumn.setAttribute('class', 'col w-100 mx-auto text-left');
 
     passwordColumn.innerHTML = '<b>Password</b>'
     passwordRow.appendChild(passwordColumn);
@@ -124,7 +124,7 @@ class LoginPanel {
     submitButton.setAttribute('class','btn btn-success w-100');
     submitButton.setAttribute('type','button');
     submitButton.setAttribute('id','submit');
-    submitButton.textContent = 'Submit';
+    submitButton.textContent = 'Masuk';
     submitButton.addEventListener('click', LoginPanel.submitAction);
 
     submitColumn.appendChild(submitButton);
@@ -140,11 +140,11 @@ class LoginPanel {
 
     const registerText = document.createElement('p');
     registerText.setAttribute('class','gl');
-    registerText.textContent = "Jika akun Anda belum terdaftar, ";
+    registerText.textContent = "Jika Anda belum mendaftar, silahkan ";
 
     const registerLink = document.createElement('a');
     registerLink.setAttribute('href',config.baseURL.concat('register.html'))
-    registerLink.textContent = 'daftar di sini'
+    registerLink.textContent = 'daftar'
 
     registerText.appendChild(registerLink);
     registerColumn.appendChild(registerText);

@@ -253,7 +253,7 @@ class RegisterPanel {
     submitButton.setAttribute('class','btn btn-success w-100');
     submitButton.setAttribute('type','button');
     submitButton.setAttribute('id','submit');
-    submitButton.textContent = 'Submit';
+    submitButton.textContent = 'Daftar';
     submitButton.addEventListener('click', RegisterPanel.submitAction);
 
     submitColumn.appendChild(submitButton);
@@ -281,7 +281,7 @@ class RegisterPanel {
 
     const loginLink = document.createElement('a');
     loginLink.setAttribute('href',config.baseURL.concat('login.html'))
-    loginLink.textContent = 'login'
+    loginLink.textContent = 'masuk'
 
     loginText.appendChild(loginLink);
     loginColumn.appendChild(loginText);
