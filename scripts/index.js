@@ -332,11 +332,13 @@ class ButtonAction{
       if (confirmed){
         const response = await FetchAPI.deleteJSON(url, data, token);
 
-      if (response.success) {
-        alert(response.message);
-        window.location = window.location.href;
+        if (response.success) {
+          alert(response.message);
+          window.location = window.location.href;
+        } else {
+          throw new Error(response.message);
+        }
       }
-    }
     } catch (error) {
       console.log(error)
       alert(error.message);
