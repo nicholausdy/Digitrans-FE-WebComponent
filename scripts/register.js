@@ -1,8 +1,8 @@
 import { config } from './util/config.js'
 import { FetchAPI } from './util/fetchAPI.js'
-import { URLParser } from './util/URLParser.js'
+// import { URLParser } from './util/URLParser.js'
 
-import { Banner } from './banner.js'
+import { Banner } from './components/banner.js'
 import { FormValidator } from './util/FormValidator.js';
 
 class RegisterPage extends HTMLElement {
@@ -11,19 +11,19 @@ class RegisterPage extends HTMLElement {
     super();
 
     //Create shadow root
-    let shadow = this.attachShadow({mode: 'open'});
+    //let shadow = this.attachShadow({mode: 'open'});
     //bootstrap
     // css
     const link = document.createElement('link');
     link.setAttribute('rel','stylesheet');
     link.setAttribute('href','./bootstrap/css/bootstrap.min.css');
-    shadow.appendChild(link);
+    this.appendChild(link);
 
     const banner = RegisterHeader.getJumbotron();
-    shadow.appendChild(banner);
+    this.appendChild(banner);
 
     const panel = RegisterPanel.getPanel();
-    shadow.appendChild(panel);
+    this.appendChild(panel);
 
   }
 }
@@ -304,14 +304,13 @@ class RegisterPanel {
 
   static async submitAction() {
     try {
-      const shadow = document.getElementById('register-page').shadowRoot;
-      const email = shadow.getElementById('email').value;
-      const password = shadow.getElementById('password').value;
-      const confirmPassword = shadow.getElementById('password1').value;
-      const institution = shadow.getElementById('institution').value;
-      const name = shadow.getElementById('name').value;
-      const telephoneNo = shadow.getElementById('phone-number').value;
-      const job = shadow.getElementById('job').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('password1').value;
+      const institution = document.getElementById('institution').value;
+      const name = document.getElementById('name').value;
+      const telephoneNo = document.getElementById('phone-number').value;
+      const job = document.getElementById('job').value;
 
       if (!(email) || !(password) || !(confirmPassword) || !(institution)
         || !(name) || !(telephoneNo) || !(job)) {

@@ -3,7 +3,7 @@ import { FetchAPI } from './util/fetchAPI.js'
 import { URLParser } from './util/URLParser.js'
 import { FormValidator } from './util/FormValidator.js'
 
-import { Banner } from './banner.js'
+import { Banner } from './components/banner.js'
 
 class LoginPage extends HTMLElement {
   constructor() {
@@ -11,19 +11,19 @@ class LoginPage extends HTMLElement {
     super();
 
     //Create shadow root
-    let shadow = this.attachShadow({mode: 'open'});
+    // let shadow = this.attachShadow({mode: 'open'});
     //bootstrap
     // css
     const link = document.createElement('link');
     link.setAttribute('rel','stylesheet');
     link.setAttribute('href','./bootstrap/css/bootstrap.min.css');
-    shadow.appendChild(link);
+    this.appendChild(link);
     
     const banner = LoginHeader.getJumbotron();
-    shadow.appendChild(banner);
+    this.appendChild(banner);
 
     const panel = LoginPanel.getPanel();
-    shadow.appendChild(panel);
+    this.appendChild(panel);
   }  
 }
 
@@ -164,9 +164,8 @@ class LoginPanel {
 
   static async submitAction(){
     try {
-      const shadow = document.getElementById('login-page').shadowRoot;
-      const email = shadow.getElementById('email').value;
-      const password = shadow.getElementById('password').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
       const url = config.backURL.concat('public/user/login');
 
       if (!(email) || !(password) || !(url)) {

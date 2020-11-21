@@ -1,5 +1,5 @@
 const config = {
-    baseURL: "http://192.168.0.14:8080/", 
+    baseURL: "http://192.168.0.55:8080/", 
     backURL: "http://206.189.153.47/"
 };
 
