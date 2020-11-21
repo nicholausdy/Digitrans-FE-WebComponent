@@ -324,13 +324,13 @@ class TableofQuestionnaires{
 class ButtonAction{
   static async deleteQuestionnaire(questionnaireId, questionnaireTitle){
     try {
-    const url = config.backURL.concat('private/deleteQuestionnaireById');
-    const data = {questionnaire_id: questionnaireId};
-    const token = localStorage.getItem('token');
+      const url = config.backURL.concat('private/deleteQuestionnaireById');
+      const data = {questionnaire_id: questionnaireId};
+      const token = localStorage.getItem('token');
     
-    const confirmed = confirm('Apakah Anda yakin ingin menghapus kuesioner dengan judul: '.concat(questionnaireTitle,'?'));
-    if (confirmed){
-      const response = await FetchAPI.deleteJSON(url, data, token);
+      const confirmed = confirm('Apakah Anda yakin ingin menghapus kuesioner dengan judul: '.concat(questionnaireTitle,'?'));
+      if (confirmed){
+        const response = await FetchAPI.deleteJSON(url, data, token);
 
       if (response.success) {
         alert(response.message);
