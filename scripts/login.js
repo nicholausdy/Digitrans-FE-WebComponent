@@ -179,6 +179,7 @@ class LoginPanel {
       
       if (response.success) {
         localStorage.setItem('token', response.message);
+        localStorage.setItem('email', email);
         const destinationURL = await URLParser.redirectURL(window.location.href,'index.html')
         window.location = destinationURL;
       } else {
