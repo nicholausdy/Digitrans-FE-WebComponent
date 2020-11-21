@@ -8,10 +8,10 @@ class NavBar {
     this.currentName = currentName;
 
     const navbarContainer = document.createElement('div');
-    navbarContainer.setAttribute('class','container-fullwidth');
+    navbarContainer.setAttribute('class','row w-100');
 
     const navbar = document.createElement('nav');
-    navbar.setAttribute('class','navbar navbar-expand-lg navbar-dark bg-dark');
+    navbar.setAttribute('class','navbar navbar-expand-lg navbar-dark bg-dark fixed-top');
 
     const brandComp = document.createElement('a');
     brandComp.setAttribute('class','navbar-brand');
@@ -68,6 +68,17 @@ class NavBar {
       navbarComponent.appendChild(navbarComponentLink);
       navbarComponentsUl.appendChild(navbarComponent);
     }
+    // dead link to show users email
+    const navbarComponentEmail = document.createElement('li');
+    navbarComponentEmail.setAttribute('class','nav-item');
+    
+    const navbarComponentEmailLink = document.createElement('a');
+    navbarComponentEmailLink.setAttribute('class', 'nav-link disabled');
+    navbarComponentEmailLink.textContent = localStorage.getItem('email');
+    
+    navbarComponentEmail.appendChild(navbarComponentEmailLink);
+    navbarComponentsUl.appendChild(navbarComponentEmail);
+    
     navbarComponentsDiv.appendChild(navbarComponentsUl);
     navbar.appendChild(navbarComponentsDiv);
     navbarContainer.appendChild(navbar);

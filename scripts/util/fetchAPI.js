@@ -18,6 +18,23 @@ class FetchAPI {
     }
   } 
 
+  static async deleteJSON (url, data, token = "") {
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '.concat(token)
+        },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  } 
+
   static async getJSON (url, token = "") {
     try {
       const response = await fetch(url, {

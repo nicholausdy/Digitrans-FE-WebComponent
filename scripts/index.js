@@ -49,7 +49,7 @@ class IndexPage extends HTMLElement {
     this.appendChild(link);
 
     //navbar
-    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Respon'],['index.html','create.html','response.html'], 'Kuesioner');
+    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Lihat respon','Ganti akun'],['index.html','create.html','response.html','login.html'], 'Kuesioner');
     this.appendChild(navbar);
 
     (async() => {
@@ -57,6 +57,11 @@ class IndexPage extends HTMLElement {
       // console.log(this.responseMessage);
       const carousel = Carousel.getCarousel(this.responseMessage);
       this.appendChild(carousel);
+
+      if (this.responseMessage.length > 0) {
+        const table = TableofQuestionnaires.getTable(this.responseMessage);
+        this.appendChild(table); 
+      }
     })();
   }
 }
@@ -68,8 +73,12 @@ class Carousel{
     } else {
       this.highlightedMessage = responseMessage.slice(responseMessage.length - 5);
     }
+
     const carouselContainer = document.createElement('div');
-    carouselContainer.setAttribute('class','container mt-5 text-center text-light');
+    carouselContainer.setAttribute('class','row mt-5 text-center text-light');
+
+    const carouselContainerCol = document.createElement('div');
+    carouselContainerCol.setAttribute('class','col-sm-10 mt-5 mx-auto')
 
     const carousel = document.createElement('div');
     carousel.setAttribute('id','carouselInterval');
@@ -111,6 +120,8 @@ class Carousel{
       let id;
       let bottom;
       let top;
+      let button;
+      let buttonCol;
 
       carouselItem = document.createElement('div');
       if ( i === 0 ){
@@ -142,6 +153,18 @@ class Carousel{
       id.setAttribute('class','mb-2');
       id.innerHTML = 'Id yang dapat dibagi: '.concat('<b>',this.highlightedMessage[i].QuestionnaireId,'</b>');
       block.appendChild(id);
+
+      buttonCol = document.createElement('div');
+      buttonCol.setAttribute('class','col')
+      button = document.createElement('button');
+      // button.setAttribute('id',this.highlightedMessage[i].QuestionnaireId);
+      button.setAttribute('class','btn btn-danger');
+      button.textContent = 'Hapus';
+      button.addEventListener("click", async() => {
+        await ButtonAction.deleteQuestionnaire(this.highlightedMessage[i].QuestionnaireId, this.highlightedMessage[i].QuestionnaireTitle);
+      })
+      buttonCol.appendChild(button);
+      block.appendChild(buttonCol);
 
       bottom = document.createElement('h6');
       bottom.innerHTML = '<br>'
@@ -190,7 +213,9 @@ class Carousel{
 
     carousel.appendChild(nextControl);
 
-    carouselContainer.appendChild(carousel);
+    carouselContainerCol.appendChild(carousel);
+
+    carouselContainer.appendChild(carouselContainerCol);
 
     this.carousel = carouselContainer;
   }
@@ -198,6 +223,124 @@ class Carousel{
   static getCarousel(responseMessage) {
     const carouselComp = new Carousel(responseMessage);
     return carouselComp.carousel;
+  }
+}
+
+class TableofQuestionnaires{
+  constructor(responseMessage){
+    this.responseMessage = responseMessage;
+
+    const tableContainer = document.createElement('div');
+    tableContainer.setAttribute('class','row mt-5');  
+    
+    const tableContainerCol = document.createElement('div');
+    tableContainerCol.setAttribute('class','col-sm-10 mx-auto');
+
+    const table = document.createElement('table');
+    table.setAttribute('class','table');
+
+    const tableHead = document.createElement('thead');
+
+    const headerRow = document.createElement('tr');
+
+    const headerCol1 = document.createElement('th');
+    headerCol1.setAttribute('scope','col');
+    headerCol1.textContent = 'Judul';
+    headerRow.appendChild(headerCol1);
+
+    const headerCol2 = document.createElement('th');
+    headerCol2.setAttribute('scope','col');
+    headerCol2.textContent = 'Deskripsi';
+    headerRow.appendChild(headerCol2);
+
+    const headerCol3 = document.createElement('th');
+    headerCol3.setAttribute('scope','col');
+    headerCol3.textContent = 'Id yang dapat dibagi';
+    headerRow.appendChild(headerCol3);
+
+    const headerCol4 = document.createElement('th');
+    headerCol4.setAttribute('scope','col');
+    headerCol4.textContent = 'Aksi';
+    headerRow.appendChild(headerCol4);
+
+    tableHead.appendChild(headerRow);
+
+    table.appendChild(tableHead);
+
+    const tableBody = document.createElement('tbody');
+
+    for (let i=0; i < this.responseMessage.length; i++) {
+      let bodyRow;
+      let titleCol;
+      let descriptionCol;
+      let idCol;
+      let buttonCol;
+      let deleteButton;
+
+      bodyRow = document.createElement('tr');
+
+      titleCol = document.createElement('td');
+      titleCol.textContent = this.responseMessage[i].QuestionnaireTitle;
+      bodyRow.appendChild(titleCol);
+
+      descriptionCol = document.createElement('td');
+      descriptionCol.textContent = this.responseMessage[i].QuestionnaireDescription;
+      bodyRow.appendChild(descriptionCol);
+
+      idCol = document.createElement('td');
+      idCol.textContent = this.responseMessage[i].QuestionnaireId;
+      bodyRow.appendChild(idCol);
+
+      buttonCol = document.createElement('td');
+      deleteButton = document.createElement('button');
+      // deleteButton.setAttribute('id',this.responseMessage[i].QuestionnaireId);
+      deleteButton.setAttribute('type','button');
+      deleteButton.setAttribute('class','btn btn-danger');
+      deleteButton.textContent = 'Hapus';
+      deleteButton.addEventListener("click", async() => {
+        await ButtonAction.deleteQuestionnaire(this.responseMessage[i].QuestionnaireId, this.responseMessage[i].QuestionnaireTitle);
+      })
+      buttonCol.appendChild(deleteButton);
+      bodyRow.appendChild(buttonCol);
+
+      tableBody.appendChild(bodyRow);
+    }
+
+    table.appendChild(tableBody);
+
+    tableContainerCol.appendChild(table);
+
+    tableContainer.appendChild(tableContainerCol);
+
+    this.table = tableContainer;
+  }
+
+  static getTable(responseMessage) {
+    const tableComp = new TableofQuestionnaires(responseMessage);
+    return tableComp.table; 
+  }
+}
+
+class ButtonAction{
+  static async deleteQuestionnaire(questionnaireId, questionnaireTitle){
+    try {
+    const url = config.backURL.concat('private/deleteQuestionnaireById');
+    const data = {questionnaire_id: questionnaireId};
+    const token = localStorage.getItem('token');
+    
+    const confirmed = confirm('Apakah Anda yakin ingin menghapus kuesioner dengan judul: '.concat(questionnaireTitle,'?'));
+    if (confirmed){
+      const response = await FetchAPI.deleteJSON(url, data, token);
+
+      if (response.success) {
+        alert(response.message);
+        window.location = window.location.href;
+      }
+    }
+    } catch (error) {
+      console.log(error)
+      alert(error.message);
+    } 
   }
 }
 
