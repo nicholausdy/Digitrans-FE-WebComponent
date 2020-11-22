@@ -5,6 +5,7 @@ import { URLParser } from './util/URLParser.js'
 import { NavBar } from './components/navbar.js'
 
 const arrofQuestionIds = [];
+const arrofArrOptionIds = [];
 
 class CreatePage extends HTMLElement{
   constructor(){
@@ -25,6 +26,9 @@ class CreatePage extends HTMLElement{
 
     const titleCard = TitleCard.getCard();
     this.appendChild(titleCard);
+
+    const submitButton = SubmitButton.getButton();
+    this.appendChild(submitButton);
   }
 }
 
@@ -108,6 +112,7 @@ class TitleCard{
     const addButton = document.createElement('button');
     addButton.setAttribute('type','button');
     addButton.setAttribute('class','btn btn-primary mt-3');
+    addButton.setAttribute('id','addquestionbutton-init');
     addButton.textContent = 'Tambah pertanyaan';
     addButton.addEventListener('click', async() => {
       const questionCard = await ButtonAction.addQuestion(addButton);
@@ -288,21 +293,77 @@ class QuestionCard {
     })
     typeDropList.appendChild(textboxDropItem);
 
-    // tambah pertanyaan button
+    //button
     const cardBody2 = document.createElement('div');
     cardBody2.setAttribute('class','card-body text-light');
     card.appendChild(cardBody2);
 
+    const buttonRow = document.createElement('row');
+    buttonRow.setAttribute('class','row mt-1 text-center');
+    cardBody2.appendChild(buttonRow);
+
+    //hapus button
+    const deleteButtonDiv = document.createElement('div');
+    deleteButtonDiv.setAttribute('class','col-sm-6');
+    buttonRow.appendChild(deleteButtonDiv);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.setAttribute('type','button');
+    deleteButton.setAttribute('class','btn btn-danger');
+    deleteButton.setAttribute('id','removequestionbutton-'.concat(idValue));
+    deleteButton.textContent = 'Hapus pertanyaan';
+    deleteButtonDiv.appendChild(deleteButton);
+    deleteButton.addEventListener('click',async() => {
+      const rootCardEl = document.getElementById('questioncard-'.concat(idValue));
+      rootCardEl.remove();
+      if (arrofQuestionIds.length > 1){
+        const poppedIndex = arrofQuestionIds.pop();
+        delete arrofArrOptionIds[poppedIndex];
+        console.log(arrofQuestionIds);
+        console.log(arrofArrOptionIds);
+        const lastIndex = arrofQuestionIds.length - 1;
+        const lastElementAfterPop = arrofQuestionIds[lastIndex];
+
+        const prevDeleteButton = document.getElementById('removequestionbutton-'.concat(lastElementAfterPop.toString()));
+        prevDeleteButton.removeAttribute('disabled');
+        prevDeleteButton.style.visibility = 'visible';
+
+        const prevAddButton = document.getElementById('addquestionbutton-'.concat(lastElementAfterPop.toString()));
+        prevAddButton.removeAttribute('disabled');
+        prevAddButton.style.visibility = 'visible';
+      } else {
+        const poppedIndex = arrofQuestionIds.pop();
+        delete arrofArrOptionIds[poppedIndex];
+        console.log(arrofQuestionIds);
+        console.log(arrofArrOptionIds);
+
+        const initAddButton = document.getElementById('addquestionbutton-init');
+        initAddButton.removeAttribute('disabled');
+        initAddButton.style.visibility = 'visible';
+
+      }
+    })
+
+    // tambah pertanyaan button
+    
+    const addButtonDiv = document.createElement('div');
+    addButtonDiv.setAttribute('class','col-sm-6');
+    buttonRow.appendChild(addButtonDiv);
+    
     const addButton = document.createElement('button');
     addButton.setAttribute('type','button');
     addButton.setAttribute('class','btn btn-primary');
+    addButton.setAttribute('id','addquestionbutton-'.concat(idValue));
     addButton.textContent = 'Tambah pertanyaan';
     addButton.addEventListener('click', async() => {
+      deleteButton.setAttribute('disabled','');
+      deleteButton.style.visibility = 'hidden';
       const questionCard = await ButtonAction.addQuestion(addButton);
       cardContainerTop.append(questionCard);
       console.log(arrofQuestionIds);
     })
-    cardBody2.appendChild(addButton);
+
+    addButtonDiv.appendChild(addButton);
 
     this.card = div;
 
@@ -333,6 +394,7 @@ class OptionButton{
   static async create(questionId){
     const div = document.createElement('div');
     div.setAttribute('id','optiondiv-'.concat(questionId.toString()));
+    
     const addOption = document.createElement('button');
     div.appendChild(addOption);
     addOption.setAttribute('id','optionbutton-'.concat(questionId.toString()));
@@ -375,8 +437,11 @@ class Option{
     // description input
     this.addArray();
 
+    const divGroup = document.createElement('div');
+
     const descInputGroup = document.createElement('div');
     descInputGroup.setAttribute('class','input-group sm-6 mt-3');
+    divGroup.appendChild(descInputGroup);
 
     const descInputPrepend = document.createElement('div');
     descInputPrepend.setAttribute('class','input-group-prepend');
@@ -392,6 +457,8 @@ class Option{
     const questionId = this.questionId;
     const lastIndex = this.arrOpts.length - 1;
     const optionId = this.arrOpts[lastIndex];
+    arrofArrOptionIds[questionId] = this.arrOpts;
+    console.log(arrofArrOptionIds);
     const idInput = 'option-'.concat(questionId.toString(),'-',optionId.toString());
 
     const descInputForm = document.createElement('input');
@@ -403,9 +470,70 @@ class Option{
     descInputForm.setAttribute('aria-describedby','description-addon');
     descInputGroup.appendChild(descInputForm);
 
-    return descInputGroup;
+    // score p
+    const scoreLabel = document.createElement('p');
+    scoreLabel.setAttribute('class','text-left');
+    scoreLabel.textContent = 'Masukkan score untuk opsi';
+    divGroup.appendChild(scoreLabel);
+
+    //score slider
+    const scoreDivContainer = document.createElement('div');
+    scoreDivContainer.setAttribute('class','d-flex justify-content-center my-4');
+    divGroup.appendChild(scoreDivContainer);
+
+    const scoreSliderDiv = document.createElement('div');
+    scoreSliderDiv.setAttribute('class','w-75');
+    scoreDivContainer.appendChild(scoreSliderDiv);
+
+    const scoreId = 'score-'.concat(questionId.toString(),'-',optionId.toString());
+    const scoreLabelId = 'scorelabel-'.concat(questionId.toString(),'-',optionId.toString());
+    const scoreInputSlider = document.createElement('input');
+    scoreInputSlider.setAttribute('type','range');
+    scoreInputSlider.setAttribute('class','custom-range');
+    scoreInputSlider.setAttribute('min','0');
+    scoreInputSlider.setAttribute('max','100');
+    scoreInputSlider.setAttribute('id',scoreId);
+    scoreInputSlider.oninput = async() => {
+      const sliderLabel = document.getElementById(scoreLabelId);
+      sliderLabel.textContent = 'Score: '.concat(scoreInputSlider.value);
+    }
+    scoreSliderDiv.appendChild(scoreInputSlider);
+
+    const scoreSliderSpan = document.createElement('span');
+    scoreSliderSpan.setAttribute('class','w-100 text-center font-weight-bold text-light ml-2 valueSpan2');
+    scoreSliderSpan.setAttribute('id',scoreLabelId);
+    divGroup.appendChild(scoreSliderSpan);
+
+    return divGroup;
   }
 
+}
+
+class SubmitButton{
+  constructor(){
+    const div = document.createElement('div');
+    div.setAttribute('class','row w-100');
+    
+    const divCol = document.createElement('col');
+    divCol.setAttribute('class','col sm-6 mx-auto text-center');
+    div.appendChild(divCol);
+
+    const button = document.createElement('button');
+    divCol.appendChild(button);
+    button.setAttribute('class','btn btn-success mt-3');
+    button.setAttribute('type','button');
+    // submitButton.setAttribute('id','submit');
+    button.textContent = 'Submit';
+    button.addEventListener('click', async() => {
+      await ButtonAction.submitAction();
+    })
+
+    this.button = div;
+  }
+  static getButton(){
+    const buttonComp = new SubmitButton();
+    return buttonComp.button;
+  }
 }
 
 class ButtonAction{
@@ -420,6 +548,117 @@ class ButtonAction{
     const value = dropDownEl.textContent;
     buttonEl.setAttribute('value',value);
     buttonEl.textContent = baseText.concat('  ',value)
+  }
+
+  static async submitAction() {
+    try {
+      const email = localStorage.getItem('email');
+      const token = localStorage.getItem('token');
+
+      let url = config.backURL.concat('private/questionnaire');
+      const questionnaire_title = document.getElementById('questionnaire_title').value;
+      const questionnaire_desc = document.getElementById('questionnaire_desc').value;
+
+      if(!(questionnaire_title) || !(questionnaire_desc)) {
+        throw new Error('Ada isian yang belum diisi');
+      }
+
+      const data = {
+        email: email, 
+        questionnaire_title: questionnaire_title, 
+        questionnaire_desc: questionnaire_desc
+      };
+
+      const questionnaireResponse = await FetchAPI.postJSON(url, data, token);
+
+      if (!(questionnaireResponse.success)){
+        throw new Error(questionnaireResponse.message);
+      }
+
+      const questionnaireObj = {};
+      const questionnaire_id = questionnaireResponse.message;
+      questionnaireObj.questionnaire_id = questionnaire_id;
+
+      const questions = [];
+
+      for (let i=0; i<arrofQuestionIds.length; i++) {
+        const questionObj = {};
+        const questionId = i.toString();
+        const question_description = document.getElementById('question_description-'.concat(questionId)).value;
+        let typeString = document.getElementById('type-'.concat(questionId)).value;
+        let isRequiredString = document.getElementById('isrequired-'.concat(questionId)).value;
+
+        if (!(question_description) || !(isRequiredString) || !(typeString)) {
+          throw new Error('Ada isian yang belum diisi');
+        }
+
+        const opA = ButtonAction.typeStringMapper(typeString);
+        const opB = ButtonAction.isRequiredStringMapper(isRequiredString);
+
+        const [type, isrequired] = await Promise.all([opA, opB]);
+
+        questionObj.question_description = question_description;
+        questionObj.type = type;
+        questionObj.isrequired = isrequired;
+
+        let options;
+
+        if ((type === 'checkbox') || (type === 'radio')) {
+          const optionList = arrofArrOptionIds[questionId];
+          options = [];
+
+          for (let j=0; j<optionList.length; j++) {
+            const optionObj = {};
+            const optionId = j.toString();
+            const description = document.getElementById('option-'.concat(questionId,'-',optionId)).value;
+            const score = document.getElementById('score-'.concat(questionId,'-',optionId)).value;
+            if (!(score) || !(description)) {
+              throw new Error('Ada isian yang belum diisi');
+            }
+            optionObj.description = description;
+            optionObj.score = parseInt(score);
+            options.push(optionObj);
+          }
+          questionObj.options = options;
+        }
+        questions.push(questionObj);
+      }
+
+      questionnaireObj.questions = questions;
+
+      // console.log(questionnaireObj);
+
+      url = config.backURL.concat('private/questions');
+      const questionResponse = await FetchAPI.postJSON(url, questionnaireObj, token);
+
+      if (!(questionResponse)) {
+        throw new Error(questionResponse.message);
+      }
+
+      alert(questionResponse.message);
+      
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  static async typeStringMapper(typeString){
+    if (typeString === 'Radio') {
+      return 'radio';
+    } else if (typeString === 'Checkbox') {
+      return 'checkbox';
+    } else if (typeString === 'Textbox') {
+      return 'text';
+    }
+  }
+
+  static async isRequiredStringMapper(isRequiredString){
+    if (isRequiredString === 'Yes') {
+      return true;
+    } else if (isRequiredString === 'No') {
+      return false;
+    }
   }
 }
 
