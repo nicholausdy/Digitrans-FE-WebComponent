@@ -21,7 +21,7 @@ class Questionnaires {
       if (response.success) {
         return response.message
       } else {
-        throw new Error(error.message);
+        throw new Error(response.message);
       }
   
     } catch (error) {
@@ -49,7 +49,7 @@ class IndexPage extends HTMLElement {
     this.appendChild(link);
 
     //navbar
-    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Lihat respon','Ganti akun'],['index.html','create.html','response.html','login.html'], 'Kuesioner');
+    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Ganti akun'],['index.html','create.html','login.html'], 'Kuesioner');
     this.appendChild(navbar);
 
     (async() => {
@@ -122,6 +122,8 @@ class Carousel{
       let top;
       let button;
       let buttonCol;
+      let viewButton;
+      // let viewButtonCol;
 
       carouselItem = document.createElement('div');
       if ( i === 0 ){
@@ -155,15 +157,28 @@ class Carousel{
       block.appendChild(id);
 
       buttonCol = document.createElement('div');
-      buttonCol.setAttribute('class','col')
+      buttonCol.setAttribute('class','col sm-6');
       button = document.createElement('button');
       // button.setAttribute('id',this.highlightedMessage[i].QuestionnaireId);
-      button.setAttribute('class','btn btn-danger');
+      button.setAttribute('type','button');
+      button.setAttribute('class','btn btn-danger mr-3');
       button.textContent = 'Hapus';
       button.addEventListener("click", async() => {
         await ButtonAction.deleteQuestionnaire(this.highlightedMessage[i].QuestionnaireId, this.highlightedMessage[i].QuestionnaireTitle);
       })
       buttonCol.appendChild(button);
+      // block.appendChild(buttonCol);
+
+      //viewButtonCol = document.createElement('div');
+      //viewButtonCol.setAttribute('class','col');
+      viewButton = document.createElement('button');
+      viewButton.setAttribute('type','button');
+      viewButton.setAttribute('class','btn btn-success ml-3');
+      viewButton.textContent = 'Lihat';
+      viewButton.addEventListener('click', async() => {
+        await ButtonAction.viewQuestionnaire(this.highlightedMessage[i].QuestionnaireId);
+      })
+      buttonCol.appendChild(viewButton);
       block.appendChild(buttonCol);
 
       bottom = document.createElement('h6');
@@ -260,8 +275,11 @@ class TableofQuestionnaires{
 
     const headerCol4 = document.createElement('th');
     headerCol4.setAttribute('scope','col');
-    headerCol4.textContent = 'Aksi';
     headerRow.appendChild(headerCol4);
+
+    const headerCol5 = document.createElement('th');
+    headerCol5.setAttribute('scope','col');
+    headerRow.appendChild(headerCol5);
 
     tableHead.appendChild(headerRow);
 
@@ -276,6 +294,8 @@ class TableofQuestionnaires{
       let idCol;
       let buttonCol;
       let deleteButton;
+      let viewButtonCol;
+      let viewButton;
 
       bodyRow = document.createElement('tr');
 
@@ -302,6 +322,17 @@ class TableofQuestionnaires{
       })
       buttonCol.appendChild(deleteButton);
       bodyRow.appendChild(buttonCol);
+
+      viewButtonCol = document.createElement('td');
+      viewButton = document.createElement('button');
+      viewButton.setAttribute('type','button');
+      viewButton.setAttribute('class','btn btn-success');
+      viewButton.textContent = 'Lihat';
+      viewButton.addEventListener('click', async() => {
+        await ButtonAction.viewQuestionnaire(this.responseMessage[i].QuestionnaireId);
+      })
+      viewButtonCol.appendChild(viewButton);
+      bodyRow.appendChild(viewButtonCol);
 
       tableBody.appendChild(bodyRow);
     }
@@ -343,6 +374,17 @@ class ButtonAction{
       console.log(error)
       alert(error.message);
     } 
+  }
+
+  static async viewQuestionnaire(questionnaireId) {
+    try {
+      localStorage.setItem('viewId',questionnaireId);
+      const destinationURL = await URLParser.redirectURL(window.location.href, 'view.html');
+      window.location = destinationURL;
+    } catch (error) {
+      console.log(error);
+      alert (error.message);
+    }
   }
 }
 
