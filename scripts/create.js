@@ -289,16 +289,20 @@ class QuestionCard {
     typeDropList.appendChild(textboxDropItem);
 
     // tambah pertanyaan button
+    const cardBody2 = document.createElement('div');
+    cardBody2.setAttribute('class','card-body text-light');
+    card.appendChild(cardBody2);
+
     const addButton = document.createElement('button');
     addButton.setAttribute('type','button');
-    addButton.setAttribute('class','btn btn-primary mt-3');
+    addButton.setAttribute('class','btn btn-primary');
     addButton.textContent = 'Tambah pertanyaan';
     addButton.addEventListener('click', async() => {
       const questionCard = await ButtonAction.addQuestion(addButton);
       cardContainerTop.append(questionCard);
       console.log(arrofQuestionIds);
     })
-    cardBody.appendChild(addButton);
+    cardBody2.appendChild(addButton);
 
     this.card = div;
 
