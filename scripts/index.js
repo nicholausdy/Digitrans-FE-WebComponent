@@ -123,6 +123,7 @@ class Carousel{
       let button;
       let buttonCol;
       let viewButton;
+      let responseButton;
       // let viewButtonCol;
 
       carouselItem = document.createElement('div');
@@ -161,7 +162,7 @@ class Carousel{
       button = document.createElement('button');
       // button.setAttribute('id',this.highlightedMessage[i].QuestionnaireId);
       button.setAttribute('type','button');
-      button.setAttribute('class','btn btn-danger mr-3');
+      button.setAttribute('class','btn btn-danger');
       button.textContent = 'Hapus';
       button.addEventListener("click", async() => {
         await ButtonAction.deleteQuestionnaire(this.highlightedMessage[i].QuestionnaireId, this.highlightedMessage[i].QuestionnaireTitle);
@@ -179,6 +180,16 @@ class Carousel{
         await ButtonAction.viewQuestionnaire(this.highlightedMessage[i].QuestionnaireId);
       })
       buttonCol.appendChild(viewButton);
+
+      responseButton = document.createElement('button');
+      responseButton.setAttribute('type',' button');
+      responseButton.setAttribute('class',' btn btn-success ml-3');
+      responseButton.textContent = 'Respon';
+      responseButton.addEventListener('click', async() => {
+        await ButtonAction.viewResponse(this.highlightedMessage[i].QuestionnaireId);
+      })
+      buttonCol.appendChild(responseButton);
+
       block.appendChild(buttonCol);
 
       bottom = document.createElement('h6');
@@ -281,6 +292,10 @@ class TableofQuestionnaires{
     headerCol5.setAttribute('scope','col');
     headerRow.appendChild(headerCol5);
 
+    const headerCol6 = document.createElement('th');
+    headerCol6.setAttribute('scope','col');
+    headerRow.appendChild(headerCol6);
+
     tableHead.appendChild(headerRow);
 
     table.appendChild(tableHead);
@@ -296,6 +311,8 @@ class TableofQuestionnaires{
       let deleteButton;
       let viewButtonCol;
       let viewButton;
+      let responseButtonCol;
+      let responseButton;
 
       bodyRow = document.createElement('tr');
 
@@ -333,6 +350,17 @@ class TableofQuestionnaires{
       })
       viewButtonCol.appendChild(viewButton);
       bodyRow.appendChild(viewButtonCol);
+
+      responseButtonCol = document.createElement('td');
+      responseButton = document.createElement('button');
+      responseButton.setAttribute('type','button');
+      responseButton.setAttribute('class','btn btn-success');
+      responseButton.textContent = 'Respon';
+      responseButton.addEventListener('click', async() => {
+        await ButtonAction.viewResponse(this.responseMessage[i].QuestionnaireId);
+      })
+      responseButtonCol.appendChild(responseButton);
+      bodyRow.appendChild(responseButtonCol);
 
       tableBody.appendChild(bodyRow);
     }
@@ -383,7 +411,18 @@ class ButtonAction{
       window.location = destinationURL;
     } catch (error) {
       console.log(error);
-      alert (error.message);
+      alert(error.message);
+    }
+  }
+
+  static async viewResponse(questionnaireId) {
+    try {
+      localStorage.setItem('viewResponseId', questionnaireId);
+      const destinationURL = await URLParser.redirectURL(window.location.href, 'response.html');
+      window.location = destinationURL;
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
     }
   }
 }
