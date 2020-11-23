@@ -49,7 +49,7 @@ class NavBar {
         
         navbarComponentLink = document.createElement('a');
         navbarComponentLink.setAttribute('class', 'nav-link');
-        navbarComponentLink.setAttribute('href', '#');
+        navbarComponentLink.setAttribute('href', config.baseURL.concat(this.arrLinks[i]));
         navbarComponentLink.textContent = this.arrNames[i];
 
         const navbarComponentSpan = document.createElement('span');
