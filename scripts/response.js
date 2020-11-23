@@ -49,6 +49,9 @@ class ResponsePage extends HTMLElement {
     (async() => {
       this.responseMessage = await Responses.getResponses();
       // console.log(this.responseMessage);
+      if (typeof this.responseMessage.scores === 'undefined') {
+        alert('Belum ada respon');
+      }
       
       if (this.responseMessage.scores.length > 0) {
         const table = TableofResponses.getTable(this.responseMessage);
