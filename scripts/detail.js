@@ -190,7 +190,7 @@ class AnswerCard{
       const optionInput = document.createElement('input');
       optionInput.setAttribute('class','form-check-input');
       optionInput.setAttribute('type', type);
-      optionInput.setAttribute('disabled','');
+      // optionInput.setAttribute('disabled','');
       optionInput.setAttribute('checked','');
       if (type === 'radio') {
         optionInput.setAttribute('name','optionGroup-'.concat(questionId.toString()))
