@@ -1,148 +1,248 @@
-import { config } from './util/config.js'
-import { FetchAPI } from './util/fetchAPI.js'
-import { URLParser } from './util/URLParser.js'
+var url = "http://206.189.153.47";
+var idAnswer = 0;
+var score = 0;
+var idCekText = 0;
+var idCekRadio = 0;
+var idCekCheckbox = 0;
+var part = 0;
+var idOptions;
+var answerLists = [];
 
-import { NavBar } from './components/navbar.js'
+async function getQuestionnaireDetails(){
+  let response = await fetch(`${url}/public/getQuestionnaireById`,{
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    mode:"cors",
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token'),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify({
+      "questionnaire_id":localStorage.getItem("answererQuestionnaireId"),
+    }),
+  });
+  let data = await response.json();
+  console.log(data);
+  let item = data.message;
+  fillQuestionnaireDescription(item.QuestionnaireTitle,item.QuestionnaireDescription);
+};
 
+async function fillQuestionnaireDescription(title,description){
+	let titleElem = document.getElementById('getQuestionnaireTitle');
+	let descriptionElem = document.getElementById('getQuestionnaireDescription');
 
-class AnswerPage{
-  
-var myvar = '<!DOCTYPE html>'+
-'<html lang="en">'+
-''+
-'<head>'+
-''+
-'  <meta http-equiv="content-type" content="text/html; charset=UTF-8">'+
-''+
-'  <title>Questionnaire</title>'+
-''+
-'  <script src="script/createQuestionnaire.js"></script>'+
-'  <script src="script/getQuestionnaire.js"></script>'+
-'  <script src="script/answer.js"></script>'+
-''+
-''+
-'  <link href=\'https://fonts.googleapis.com/css?family=Lato:400,300,400italic,700,900\' rel=\'stylesheet\' type=\'text/css\'>'+
-''+
-'  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">'+
-'  <meta name="description" content="Techie Bootstrap 3 skin">'+
-'  <meta name="keywords" content="bootstrap 3, skin, flat">'+
-'  <meta name="author" content="bootstraptaste">'+
-''+
-'  <!-- Bootstrap css -->'+
-'  <link href="assets/css/bootstrap.min.css" rel="stylesheet">'+
-'  <link href="assets/css/bootstrap.techie.css" rel="stylesheet">'+
-''+
-'  <link href="assets/css/answer.css" rel="stylesheet">'+
-''+
-'  <style>'+
-'    body,'+
-'    html {'+
-'      overflow-x: hidden'+
-'    }'+
-''+
-'    body {'+
-'      padding: 6px'+
-'    }'+
-''+
-'    footer {'+
-'      border-top: 1px solid #ddd;'+
-'      padding: 30px;'+
-'      margin-top: 50px'+
-'    }'+
-''+
-'    .row>[class*=col-] {'+
-'      margin-bottom: 65px'+
-'    }'+
-''+
-'    .col-sm-{'+
-'      background: red;'+
-'    }'+
-''+
-'    .navbar-container {'+
-'      position: relative;'+
-'      min-height: 100px'+
-'    }'+
-''+
-'	.navbar-default {'+
-'	 margin : 0 !important; '+
-'	}'+
-'	</style>'+
-'</head>'+
-''+
-'<body style="background-color:#e6e6ff">'+
-''+
-'  <div class="container" style="padding:5% 0 5% 21%">'+
-''+
-'    <div class="row" >'+
-'      <!-- Navbar -->'+
-'      <div class="col-sm-12 col-lg-12" >'+
-'            <nav class="navbar navbar-inverse-modify navbar-fixed-top container" role="navigation" style="background-color:#e6ffff">'+
-'              <!-- Brand and toggle get grouped for better mobile display -->'+
-'              <div class="container-fluid">'+
-'              <div class="navbar-header">'+
-'                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex2-collapse">'+
-'                    <span class="sr-only">Toggle navigation</span>'+
-'                    <span class="icon-bar"></span>'+
-'                    <span class="icon-bar"></span>'+
-'                    <span class="icon-bar"></span>'+
-'                  </button>'+
-'                <a class="navbar-brand" href="#"><b>Answer Questionnaire</b></a>'+
-'              </div>'+
-''+
-'              <!-- Collect the nav links, forms, and other content for toggling -->'+
-'              <div class="collapse navbar-collapse navbar-ex2-collapse">'+
-'                <ul class="nav navbar-nav">	'+
-'                    </ul>'+
-'                  </li>'+
-'                </ul>'+
-'              </div>'+
-'              <!-- /.navbar-collapse -->'+
-'            </nav>'+
-''+
-'          </div>'+
-'    </div>'+
-'    <!-- Navs done -->'+
-''+
-'   <div class="tampilanlogin" style="padding-top:3%;background-color:#f2f2f2;margin-right:20%">'+
-'		<table style="margin-bottom:2%" class="tablelogin">'+
-'			<tr>'+
-'				<td>'+
-'          <div class="card">'+
-'            <p id="getQuestionnaireTitle" style="font-style:Lato;font-weight:bold;font-size:35px"></p>'+
-'          </div>'+
-'        </td>'+
-'			</tr>'+
-'			<tr>'+
-'				<td><p id="getQuestionnaireDescription"></p></td>'+
-'		</table>'+
-'		<!-- Button -->'+
-'		</div>'+
-'  <div class="row" style="margin-bottom:1%">'+
-''+
-'  </div>'+
-'  <div id="listAnswers" style="background-color:#e5e9f9;margin-right:20%"></div>'+
-'  <div class="row">'+
-'    <div class="col-sm-6">'+
-'      <button type="button" class="btn btn-primary" onclick="answerQuestions()">Submit</button><br><br>'+
-'    </div>'+
-'    <div class="col-sm-6" style="transform: translate(40%)">'+
-'      <a href="landingPageAnswer.html"><button class="btn btn-info">Back</button>'+
-'    </div>'+
-'  <!-- Main Scripts-->'+
-'  <script src="assets/js/jquery.js"></script>'+
-'  <script src="assets/js/bootstrap.min.js"></script>'+
-''+
-'  <!-- Bootstrap 3 has typeahead optionally -->'+
-'  <script src="assets/js/typeahead.min.js"></script>'+
-'  <script>'+
-'    window.onload=loadQuestions();'+
-'    window.onload=getQuestionnaireDetails();'+
-'  </script>'+
-''+
-'</body>'+
-''+
-'</html>';
+	titleElem.innerText = title;
+	descriptionElem.innerText = description;
+}
+async function createContainerText(description){
+	idAnswer += 1;
+
+	let descriptionCell = document.createElement('div');
+
+	let answerCell = document.createElement('div');
 	
+	let descriptions = document.createTextNode(description);
 
+	let answer = document.createElement('input');
+	answer.setAttribute('id','text'+[idAnswer]);
 
-customElements.define('answer-page',AnswerPage);
+	descriptionCell.appendChild(descriptions);
+	answerCell.appendChild(answer);
+
+	let container = document.createElement('div');
+	container.setAttribute('style','margin:3%');
+	container.setAttribute('class','boxItem');
+	container.appendChild(descriptionCell);
+	container.appendChild(answerCell);
+
+	let section = document.getElementById('listAnswers');
+	section.appendChild(container);
+	container.setAttribute('style','margin-bottom:5%');
+};
+
+async function createContainerRadio(description,point,length){
+	idAnswer += 1;
+
+	idCekRadio += 1;
+
+	idOptions = 0;
+
+	let descriptionCell = document.createElement('div');
+
+	let answerCell = document.createElement('form');
+	answerCell.setAttribute('id','listsOfRadioOptions'+[idCekRadio]);
+
+	let container = document.createElement('div');
+	container.setAttribute('style','margin:3%');
+
+	let descriptions = document.createTextNode(description);
+
+	descriptionCell.appendChild(descriptions);
+
+	container.appendChild(descriptionCell);
+
+	container.appendChild(answerCell);
+
+	container.setAttribute('class','boxItem');
+
+	container.setAttribute('style','margin-bottom:5%');
+
+	let section = document.getElementById('listAnswers');
+	section.appendChild(container);
+};
+
+async function createContainerCheckbox(description,point,length){
+	idAnswer += 1;
+
+	idCekCheckbox += 1;
+
+	idOptions = 0;
+
+	let descriptionCell = document.createElement('form');
+
+	let answerCell = document.createElement('form');
+	answerCell.setAttribute('id','listsOfCheckboxOptions'+[idCekCheckbox]);
+
+	let container = document.createElement('div');
+	container.setAttribute('style','margin:3%');
+
+	let descriptions = document.createTextNode(description);
+
+	descriptionCell.appendChild(descriptions);
+
+	container.appendChild(descriptionCell);
+
+	container.appendChild(answerCell);
+
+	container.setAttribute('class','boxItem');
+
+	container.setAttribute('style','margin-bottom:5%');
+
+	let section = document.getElementById('listAnswers');
+	section.appendChild(container);
+};
+
+async function createOptionsRadio(description,point){
+	idOptions = idOptions + 1;
+
+	let containerInput = document.createElement('input');
+	let label = document.createElement('label');
+	containerInput.setAttribute('type','radio');
+	containerInput.setAttribute('id',[idAnswer]+[idOptions]);
+	containerInput.setAttribute('value',description);
+	containerInput.setAttribute('name','description'+[idCekRadio]);
+	label.appendChild(containerInput);
+	label.innerHTML += description;
+	score = score + point;
+
+	linebreak = document.createElement("br");
+
+	let section = document.getElementById('listsOfRadioOptions'+[idCekRadio]);
+	section.appendChild(label);
+	section.appendChild(linebreak);
+}
+
+async function createOptionsCheckbox(description,point){
+	idOptions = idOptions + 1;
+
+	let containerInput = document.createElement('input');
+	let label = document.createElement('label');
+	containerInput.setAttribute('type','checkbox');
+	containerInput.setAttribute('id',[idAnswer]+[idOptions]);
+	containerInput.setAttribute('value',description);
+	containerInput.setAttribute('name','description'+[idCekCheckbox]);
+	label.appendChild(containerInput);
+	label.innerHTML += description;
+	score = score + point;
+
+	linebreak = document.createElement("br");
+
+	let section = document.getElementById('listsOfCheckboxOptions'+[idCekCheckbox]);
+	section.appendChild(label);
+	section.appendChild(linebreak);
+};
+
+async function answerQuestions(){
+
+	let data = await fetch(`${url}/private/getQuestions`,{
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    mode:"cors",
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token'),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify({
+      "questionnaire_id":localStorage.getItem('answererQuestionnaireId'),
+    }),
+   });
+   let hasil = await data.json();
+   console.log(hasil);
+   let result = hasil.message.questions;
+   for(let i=0;i<result.length;i++){
+   	let answersRadio =[];
+	let answersCheckbox =[];
+   	if(result[i].type === "text"){
+   	let hasilText = document.getElementById('text'+[i+1]);
+   		const answers = {
+   			question_id: i,
+   			answer: [hasilText.value],
+   		}
+   	answerLists.push(answers);
+   	}
+
+   	if(result[i].type === "radio"){
+   		const jawabanRadio = {
+   			question_id:i,
+   			answer: answersRadio,
+   		}
+   		for(let j=0;j<result[i].options.length;j++){
+   			if(document.getElementById([i+1]+[j+1]).checked){
+	   				answersRadio.push(j);
+	   		}
+   		}
+   	answerLists.push(jawabanRadio);
+   	}
+
+   	if(result[i].type === "checkbox"){
+   		const jawabanCheckbox = {
+   			question_id:i,
+   			answer: answersCheckbox,
+   		}
+   		for(let j=0;j<result[i].options.length;j++){
+   			if(document.getElementById([i+1]+[j+1]).checked){
+	   				answersCheckbox.push(j);
+	   		}
+   		}
+   	answerLists.push(jawabanCheckbox);
+   	}
+
+   }
+   console.log(JSON.stringify(answerLists));
+	let responses = await fetch(`${url}/public/answer`, {
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    mode:"cors",
+    headers: {
+      'Content-Type': 'application/json',
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify({
+      "questionnaire_id": localStorage.getItem('answererQuestionnaireId'),
+      "answerer_name": localStorage.getItem('answererName'),
+      "answerer_email": localStorage.getItem('answererEmail'),
+      "answerer_company": localStorage.getItem('answererCompany'),
+      "answers":answerLists,
+    }),
+  });
+  let resps = await responses.json();
+  console.log(resps);
+  console.log(JSON.stringify({
+      "questionnaire_id": localStorage.getItem('answererQuestionnaireId'),
+      "answerer_name": localStorage.getItem('answererName'),
+      "answerer_email": localStorage.getItem('answererEmail'),
+      "answerer_company": localStorage.getItem('answererCompany'),
+      "answers":answerLists,
+    }));
+   let urlPart1 = window.location.href.split("/");
+    window.location = urlPart1.splice(0, urlPart1.length - 1).join("/") + "/answer.html";
+}
