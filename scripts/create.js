@@ -490,7 +490,7 @@ class Option{
     const scoreInputSlider = document.createElement('input');
     scoreInputSlider.setAttribute('type','range');
     scoreInputSlider.setAttribute('class','custom-range');
-    scoreInputSlider.setAttribute('min','0');
+    scoreInputSlider.setAttribute('min','-100');
     scoreInputSlider.setAttribute('max','100');
     scoreInputSlider.setAttribute('id',scoreId);
     scoreInputSlider.oninput = async() => {
