@@ -631,7 +631,7 @@ class ButtonAction{
       url = config.backURL.concat('private/questions');
       const questionResponse = await FetchAPI.postJSON(url, questionnaireObj, token);
 
-      if (!(questionResponse)) {
+      if (!(questionResponse.success)) {
         throw new Error(questionResponse.message);
       }
 
