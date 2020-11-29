@@ -96,12 +96,16 @@ class TitleCard {
 
     const title = document.createElement('h5');
     title.setAttribute('class','card-title');
-    title.innerHTML = ''.concat('<b>',questionnaireInfo.QuestionnaireTitle,'</b>');
+    const titleBoldStyle = document.createElement('b');
+    title.appendChild(titleBoldStyle);
+    titleBoldStyle.textContent =  questionnaireInfo.QuestionnaireTitle;
     cardBody.appendChild(title);
 
     const description = document.createElement('h6');
     description.setAttribute('class','card-subtitle mb-2 text-muted');
-    description.innerHTML = ''.concat('<b>',questionnaireInfo.QuestionnaireDescription,'</b>');
+    const descriptionBoldStyle = document.createElement('b');
+    description.appendChild(descriptionBoldStyle);
+    descriptionBoldStyle.textContent = questionnaireInfo.QuestionnaireDescription;
     cardBody.appendChild(description);
 
     this.card = cardContainerTop;
@@ -195,5 +199,7 @@ class QuestionsCard{
     return div;
   }
 }
+
+export {TitleCard};
 
 customElements.define('view-page',ViewPage);

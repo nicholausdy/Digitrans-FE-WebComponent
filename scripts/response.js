@@ -54,10 +54,53 @@ class ResponsePage extends HTMLElement {
       }
       
       if (this.responseMessage.scores.length > 0) {
+        const analyticsButton = AnalyticsButton.getButton();
+        this.appendChild(analyticsButton);
+
         const table = TableofResponses.getTable(this.responseMessage);
         this.appendChild(table); 
       }
     })();
+  }
+}
+
+class AnalyticsButton{
+  constructor(){
+    const div = document.createElement('div');
+
+    const paddingTop = document.createElement('div');
+    paddingTop.setAttribute('class', 'row mt-5');
+    div.appendChild(paddingTop);
+
+    const paddingTop2 = document.createElement('div');
+    paddingTop2.setAttribute('class', 'row mt-5');
+    div.appendChild(paddingTop2);
+
+    const buttonRow = document.createElement('div');
+    buttonRow.setAttribute('class','row mt-3');
+    div.appendChild(buttonRow);
+
+    const buttonColumn = document.createElement('div');
+    buttonColumn.setAttribute('class', 'col-sm-10 mx-auto');
+
+    const button = document.createElement('button');
+    button.setAttribute('class','btn btn-success w-25');
+    button.setAttribute('type','button');
+    button.setAttribute('id','submit');
+    button.textContent = 'Lihat Analytics';
+    button.addEventListener('click', async() => {
+      await ButtonAction.viewAnalytics();
+    });
+
+    buttonColumn.appendChild(button);
+    buttonRow.appendChild(buttonColumn);
+
+    this.button = div;
+  }
+
+  static getButton(){
+    const analyticsButton = new AnalyticsButton();
+    return analyticsButton.button; 
   }
 }
 
@@ -67,12 +110,8 @@ class TableofResponses{
 
     const div = document.createElement('div');
 
-    const tableContainerPad = document.createElement('div');
-    tableContainerPad.setAttribute('class','row mt-5');
-    div.appendChild(tableContainerPad);
-
     const tableContainer = document.createElement('div');
-    tableContainer.setAttribute('class','row mt-5');
+    tableContainer.setAttribute('class','row mt-3');
 
     const tableContainerCol = document.createElement('div');
     tableContainerCol.setAttribute('class','col-sm-10 mx-auto');
@@ -157,6 +196,16 @@ class ButtonAction{
     try {
       localStorage.setItem('answerer_email',answererEmail);
       const destinationURL = await URLParser.redirectURL(window.location.href, 'detail.html');
+      window.location = destinationURL;
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  static async viewAnalytics(){
+    try {
+      const destinationURL = await URLParser.redirectURL(window.location.href, 'analytics.html');
       window.location = destinationURL;
     } catch (error) {
       console.log(error);

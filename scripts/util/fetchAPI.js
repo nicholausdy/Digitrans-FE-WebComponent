@@ -50,6 +50,49 @@ class FetchAPI {
       throw new Error(error.message);
     }
   }
+
+  static async getStream(url, data, token = "") {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '.concat(token)
+        },
+        body: JSON.stringify(data)
+      })
+
+      const body = response.body;
+      const reader = body.getReader();
+
+      // return stream
+      const stream =  new ReadableStream({
+        async start(controller) {
+          while(true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+              break;
+            }
+
+            controller.enqueue(value);
+          }
+          controller.close();
+          reader.releaseLock();
+        }
+      })
+
+      //create blob URL
+      let transformedResp = new Response(stream);
+      transformedResp = await transformedResp.blob();
+      const blobURL = URL.createObjectURL(transformedResp);
+      return blobURL;
+
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }
 
 export { FetchAPI }
