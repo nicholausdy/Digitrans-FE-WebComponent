@@ -137,7 +137,7 @@ class AnalyticsCard{
       embed.setAttribute('type','image/svg+xml');
       embed.setAttribute('src', blobURL); 
       embed.addEventListener('load', async() => {
-        await FetchAPI.revokeURL(blobURL);
+        await FetchAPI.revokeURL(embed.src);
       })
       return fig;
 
