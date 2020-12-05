@@ -93,6 +93,15 @@ class FetchAPI {
       throw new Error(error.message);
     }
   }
+
+  static async revokeURL(blobURL) {
+    try {
+      // remove references to file
+      URL.revokeObjectURL(blobURL);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }
 
 export { FetchAPI }
