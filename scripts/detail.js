@@ -53,7 +53,7 @@ class DetailPage extends HTMLElement {
     this.appendChild(link);
 
     //navbar
-    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Ganti akun'],['index.html','create.html','login.html'], 'Kuesioner');
+    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Langganan','Ganti akun'],['index.html','create.html','subscription.html','login.html'], 'Kuesioner');
     this.appendChild(navbar);
 
     (async() => {
