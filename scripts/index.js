@@ -331,7 +331,7 @@ class TableofQuestionnaires{
 
       dateCol = document.createElement('td');
       dateCol.textContent = this.responseMessage[i].CreatedAt;
-      bodyRow.appendChild(dateCol;)
+      bodyRow.appendChild(dateCol);
 
       buttonCol = document.createElement('td');
       deleteButton = document.createElement('button');
