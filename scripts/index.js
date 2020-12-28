@@ -284,6 +284,11 @@ class TableofQuestionnaires{
     headerCol3.textContent = 'Id yang dapat dibagi';
     headerRow.appendChild(headerCol3);
 
+    const headerColDate = document.createElement('th');
+    headerColDate.setAttribute('scope','col');
+    headerColDate.textContent = 'Tanggal pembuatan';
+    headerRow.appendChild(headerColDate);
+
     const headerCol4 = document.createElement('th');
     headerCol4.setAttribute('scope','col');
     headerRow.appendChild(headerCol4);
