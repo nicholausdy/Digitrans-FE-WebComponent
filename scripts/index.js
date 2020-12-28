@@ -307,6 +307,7 @@ class TableofQuestionnaires{
       let titleCol;
       let descriptionCol;
       let idCol;
+      let dateCol;
       let buttonCol;
       let deleteButton;
       let viewButtonCol;
@@ -327,6 +328,10 @@ class TableofQuestionnaires{
       idCol = document.createElement('td');
       idCol.textContent = this.responseMessage[i].QuestionnaireId;
       bodyRow.appendChild(idCol);
+
+      dateCol = document.createElement('td');
+      dateCol.textContent = this.responseMessage[i].CreatedAt;
+      bodyRow.appendChild(dateCol;)
 
       buttonCol = document.createElement('td');
       deleteButton = document.createElement('button');
