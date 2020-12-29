@@ -136,6 +136,7 @@ class AnalyticsCard{
       // fig.appendChild(embed);
       embed.setAttribute('type','image/svg+xml');
       embed.setAttribute('data', blobURL); 
+      embed.setAttribute('class','pygal-chart')
       embed.addEventListener('load', async() => {
         await FetchAPI.revokeURL(embed.src);
       })
