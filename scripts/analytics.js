@@ -131,15 +131,16 @@ class AnalyticsCard{
 
       const blobURL = await FetchAPI.getStream(url, data, token)
 
-      const fig = document.createElement('figure');
-      const embed = document.createElement('embed');
-      fig.appendChild(embed);
+      // const fig = document.createElement('figure');
+      const embed = document.createElement('object');
+      // fig.appendChild(embed);
       embed.setAttribute('type','image/svg+xml');
-      embed.setAttribute('src', blobURL); 
+      embed.setAttribute('data', blobURL); 
       embed.addEventListener('load', async() => {
         await FetchAPI.revokeURL(embed.src);
       })
-      return fig;
+      // return fig;
+      return embed;
 
     } catch (error) {
       console.log(error);
