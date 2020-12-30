@@ -140,7 +140,7 @@ class AnalyticsCard{
         await FetchAPI.revokeURL(embed.src);
       })
       // return fig;
-      return embed;
+      return fig;
 
     } catch (error) {
       console.log(error);
