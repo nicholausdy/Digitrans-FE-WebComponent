@@ -131,12 +131,11 @@ class AnalyticsCard{
 
       const blobURL = await FetchAPI.getStream(url, data, token)
 
-      // const fig = document.createElement('figure');
-      const embed = document.createElement('object');
-      // fig.appendChild(embed);
+      const fig = document.createElement('figure');
+      const embed = document.createElement('embed');
+      fig.appendChild(embed);
       embed.setAttribute('type','image/svg+xml');
-      embed.setAttribute('data', blobURL); 
-      embed.setAttribute('class','pygal-chart')
+      embed.setAttribute('src', blobURL); 
       embed.addEventListener('load', async() => {
         await FetchAPI.revokeURL(embed.src);
       })
