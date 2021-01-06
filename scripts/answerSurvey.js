@@ -334,7 +334,7 @@ class SubmitButton{
     } catch (error) {
       console.log(error);
       if (error.message === 'SequelizeUniqueConstraintError') {
-        alert('Jawaban sudah tersimpan')
+        alert('Anda hanya bisa mengirimkan jawaban satu kali dengan satu email');
       } else {
         alert(error.message);
       }
