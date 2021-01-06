@@ -6,6 +6,7 @@ import { NavBar } from './components/navbar.js'
 
 const arrofQuestionIds = [];
 const arrofArrOptionIds = [];
+let lastId = -1;
 
 class CreatePage extends HTMLElement{
   constructor(){
@@ -115,9 +116,11 @@ class TitleCard{
     addButton.setAttribute('id','addquestionbutton-init');
     addButton.textContent = 'Tambah pertanyaan';
     addButton.addEventListener('click', async() => {
-      const questionCard = await ButtonAction.addQuestion(addButton);
-      cardContainerTop.append(questionCard);
-      console.log(arrofQuestionIds);
+      const questionCard = await ButtonAction.addQuestion();
+      // console.log(lastId);
+      // cardContainerTop.append(questionCard);
+      cardContainerTop.insertBefore(questionCard, cardContainer.nextSibling);
+      // console.log(arrofQuestionIds);
     })
     cardBody.appendChild(addButton);
 
@@ -132,7 +135,7 @@ class TitleCard{
 
 class QuestionCard {
   constructor(){
-    this.questionId = arrofQuestionIds[arrofQuestionIds.length - 1];
+    this.questionId = lastId;
     const idValue = this.questionId.toString();
 
     const div = document.createElement('div');
@@ -286,7 +289,7 @@ class QuestionCard {
     textboxDropItem.addEventListener('click', async() => {
       await ButtonAction.dropDownAction(typeButton, textboxDropItem, 'Type?');
       const DOMtodelete = document.getElementById('optiondiv-'.concat(idValue));
-      console.log(DOMtodelete);
+      // console.log(DOMtodelete);
       if (DOMtodelete) {
         DOMtodelete.remove();
       }
@@ -314,34 +317,39 @@ class QuestionCard {
     deleteButton.textContent = 'Hapus pertanyaan';
     deleteButtonDiv.appendChild(deleteButton);
     deleteButton.addEventListener('click',async() => {
-      const rootCardEl = document.getElementById('questioncard-'.concat(idValue));
-      rootCardEl.remove();
-      if (arrofQuestionIds.length > 1){
-        const poppedIndex = arrofQuestionIds.pop();
-        delete arrofArrOptionIds[poppedIndex];
-        console.log(arrofQuestionIds);
-        console.log(arrofArrOptionIds);
-        const lastIndex = arrofQuestionIds.length - 1;
-        const lastElementAfterPop = arrofQuestionIds[lastIndex];
+      await ButtonAction.deleteQuestion(div, this.questionId);
+      delete arrofArrOptionIds[this.questionId];
+      // console.log(arrofQuestionIds)
+      // console.log(arrofArrOptionIds)
+      // delete arrofArrOptionIds[this.questionId];
+      // const rootCardEl = document.getElementById('questioncard-'.concat(idValue));
+      // rootCardEl.remove();
+      // if (arrofQuestionIds.length > 1){
+        // const poppedIndex = arrofQuestionIds.pop();
+        // delete arrofArrOptionIds[poppedIndex];
+        // console.log(arrofQuestionIds);
+        // console.log(arrofArrOptionIds);
+        // const lastIndex = arrofQuestionIds.length - 1;
+        // const lastElementAfterPop = arrofQuestionIds[lastIndex];
 
-        const prevDeleteButton = document.getElementById('removequestionbutton-'.concat(lastElementAfterPop.toString()));
-        prevDeleteButton.removeAttribute('disabled');
-        prevDeleteButton.style.visibility = 'visible';
+      //   await QuestionCard.removeGlobalArray()
 
-        const prevAddButton = document.getElementById('addquestionbutton-'.concat(lastElementAfterPop.toString()));
-        prevAddButton.removeAttribute('disabled');
-        prevAddButton.style.visibility = 'visible';
-      } else {
-        const poppedIndex = arrofQuestionIds.pop();
-        delete arrofArrOptionIds[poppedIndex];
-        console.log(arrofQuestionIds);
-        console.log(arrofArrOptionIds);
+      //   const prevDeleteButton = document.getElementById('removequestionbutton-'.concat(lastElementAfterPop.toString()));
+      //   prevDeleteButton.removeAttribute('disabled');
+      //   prevDeleteButton.style.visibility = 'visible';
 
-        const initAddButton = document.getElementById('addquestionbutton-init');
-        initAddButton.removeAttribute('disabled');
-        initAddButton.style.visibility = 'visible';
+      //   const prevAddButton = document.getElementById('addquestionbutton-'.concat(lastElementAfterPop.toString()));
+      //   prevAddButton.removeAttribute('disabled');
+      //   prevAddButton.style.visibility = 'visible';
+      // } else {
+      //   const poppedIndex = arrofQuestionIds.pop();
+      //   delete arrofArrOptionIds[poppedIndex];
+      //   console.log(arrofQuestionIds);
+      //   console.log(arrofArrOptionIds);
 
-      }
+      //   const initAddButton = document.getElementById('addquestionbutton-init');
+      //   initAddButton.removeAttribute('disabled');
+      //   initAddButton.style.visibility = 'visible';
     })
 
     // tambah pertanyaan button
@@ -356,11 +364,16 @@ class QuestionCard {
     addButton.setAttribute('id','addquestionbutton-'.concat(idValue));
     addButton.textContent = 'Tambah pertanyaan';
     addButton.addEventListener('click', async() => {
-      deleteButton.setAttribute('disabled','');
-      deleteButton.style.visibility = 'hidden';
-      const questionCard = await ButtonAction.addQuestion(addButton);
-      cardContainerTop.append(questionCard);
-      console.log(arrofQuestionIds);
+      //deleteButton.setAttribute('disabled','');
+      //deleteButton.style.visibility = 'hidden';
+      const questionCard = await ButtonAction.addQuestion(this.questionId);
+      //console.log(this.questionId)
+      // cardContainerTop.append(questionCard);
+      // console.log(div.nextSibling)
+      div.parentNode.insertBefore(questionCard, div.nextSibling);
+      // console.log(arrofQuestionIds)
+      // console.log(arrofArrOptionIds)
+      // console.log(arrofQuestionIds);
     })
 
     addButtonDiv.appendChild(addButton);
@@ -374,18 +387,22 @@ class QuestionCard {
     return questionCard.card;
   }
 
-  static addGlobalArray(){
+  static addGlobalArray(currHTMLElementIndex=-1){
+    lastId++;
     if (arrofQuestionIds.length === 0){
-      arrofQuestionIds.push(0);
+      arrofQuestionIds.push(lastId);
     } else {
-      const lastIndex = arrofQuestionIds.length - 1;
-      arrofQuestionIds.push(arrofQuestionIds[lastIndex] + 1);
+      //const lastIndex = arrofQuestionIds.length - 1;
+      // arrofQuestionIds.push(arrofQuestionIds[lastIndex] + 1);
+      const globalArrayIndex = arrofQuestionIds.indexOf(currHTMLElementIndex);
+      arrofQuestionIds.splice(globalArrayIndex + 1, 0, lastId);
     }
   }
   
-  static removeGlobalArray(){
+  static removeGlobalArray(currHTMLElementIndex){
     if (arrofQuestionIds.length !== 0) {
-      arrofQuestionIds.pop();
+      const globalArrayIndex = arrofQuestionIds.indexOf(currHTMLElementIndex);
+      arrofQuestionIds.splice(globalArrayIndex, 1);
     }
   }
 }
@@ -458,7 +475,7 @@ class Option{
     const lastIndex = this.arrOpts.length - 1;
     const optionId = this.arrOpts[lastIndex];
     arrofArrOptionIds[questionId] = this.arrOpts;
-    console.log(arrofArrOptionIds);
+    // console.log(arrofArrOptionIds);
     const idInput = 'option-'.concat(questionId.toString(),'-',optionId.toString());
 
     const descInputForm = document.createElement('input');
@@ -537,11 +554,16 @@ class SubmitButton{
 }
 
 class ButtonAction{
-  static async addQuestion(buttonEl){
-    QuestionCard.addGlobalArray();
-    buttonEl.setAttribute('disabled','');
-    buttonEl.style.visibility = 'hidden';
+  static async addQuestion(currHTMLElementIndex=-1){
+    QuestionCard.addGlobalArray(currHTMLElementIndex);
+    //buttonEl.setAttribute('disabled','');
+    //buttonEl.style.visibility = 'hidden';
     return QuestionCard.getCard();
+  }
+
+  static async deleteQuestion(rootDiv, currHTMLElementIndex){
+    rootDiv.remove();
+    QuestionCard.removeGlobalArray(currHTMLElementIndex);
   }
 
   static async dropDownAction(buttonEl, dropDownEl, baseText) {
@@ -583,10 +605,11 @@ class ButtonAction{
 
       for (let i=0; i<arrofQuestionIds.length; i++) {
         const questionObj = {};
-        const questionId = i.toString();
-        const question_description = document.getElementById('question_description-'.concat(questionId)).value;
-        let typeString = document.getElementById('type-'.concat(questionId)).value;
-        let isRequiredString = document.getElementById('isrequired-'.concat(questionId)).value;
+        const questionId = arrofQuestionIds[i];
+        const questionIdStr = questionId.toString();
+        const question_description = document.getElementById('question_description-'.concat(questionIdStr)).value;
+        let typeString = document.getElementById('type-'.concat(questionIdStr)).value;
+        let isRequiredString = document.getElementById('isrequired-'.concat(questionIdStr)).value;
 
         if (!(question_description) || !(isRequiredString) || !(typeString)) {
           throw new Error('Ada isian yang belum diisi');
@@ -602,16 +625,18 @@ class ButtonAction{
         questionObj.isrequired = isrequired;
 
         let options;
-
+        // console.log(arrofQuestionIds);
+        // console.log(arrofArrOptionIds);
         if ((type === 'checkbox') || (type === 'radio')) {
           const optionList = arrofArrOptionIds[questionId];
           options = [];
 
           for (let j=0; j<optionList.length; j++) {
             const optionObj = {};
-            const optionId = j.toString();
-            const description = document.getElementById('option-'.concat(questionId,'-',optionId)).value;
-            const score = document.getElementById('score-'.concat(questionId,'-',optionId)).value;
+            const optionId = j;
+            const optionIdStr = optionId.toString();
+            const description = document.getElementById('option-'.concat(questionIdStr,'-',optionIdStr)).value;
+            const score = document.getElementById('score-'.concat(questionIdStr,'-',optionIdStr)).value;
             if (!(score) || !(description)) {
               throw new Error('Ada isian yang belum diisi');
             }
