@@ -51,7 +51,7 @@ class FetchAPI {
     }
   }
 
-  static async getStream(url, data, token = "") {
+  static async getStream(url, data, initObject, token = "") {
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -84,7 +84,7 @@ class FetchAPI {
       })
 
       //create blob URL
-      let transformedResp = new Response(stream);
+      let transformedResp = new Response(stream, initObject);
       transformedResp = await transformedResp.blob();
       const blobURL = URL.createObjectURL(transformedResp);
       return blobURL;

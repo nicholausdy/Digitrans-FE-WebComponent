@@ -128,8 +128,8 @@ class AnalyticsCard{
       const data = {questionnaire_id: questionnaire_id, question_id: question_id}; 
       const token = localStorage.getItem('token');
 
-
-      const blobURL = await FetchAPI.getStream(url, data, token)
+      const headerInit = { "headers": {"Content-Type": "image/svg+xml"}};
+      const blobURL = await FetchAPI.getStream(url, data, headerInit, token);
 
       const fig = document.createElement('figure');
       const embed = document.createElement('embed');
