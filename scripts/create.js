@@ -488,7 +488,7 @@ class Option{
       dropItem.setAttribute('class','dropdown-item');
       dropItem.textContent = questionNo.toString(10);
       dropItem.addEventListener('click', async() => {
-        await ButtonAction.dropDownAction(buttonDiv, dropItem, 'Jika dipilih opsi ini, pergi ke pertanyaan nomor?');
+        await ButtonAction.dropDownAction(buttonDiv, dropItem, 'Jika opsi ini dipilih, pergi ke pertanyaan nomor?');
       })
       listOfItems.push(dropItem);
     }
