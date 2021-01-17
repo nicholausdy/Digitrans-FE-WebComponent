@@ -121,6 +121,7 @@ class TitleCard{
       // cardContainerTop.append(questionCard);
       cardContainerTop.insertBefore(questionCard, cardContainer.nextSibling);
       // console.log(arrofQuestionIds);
+      await QuestionCard.updateQuestionLabel();
     })
     cardBody.appendChild(addButton);
 
@@ -181,6 +182,7 @@ class QuestionCard {
     descInputSpan.setAttribute('class','input-group-text');
     descInputSpan.setAttribute('id','description-addon');
     descInputSpan.setAttribute('style','width: 10rem;')
+    descInputSpan.setAttribute('name','label-pertanyaan')
     descInputSpan.textContent = 'Pertanyaan';
     descInputPrepend.appendChild(descInputSpan);
 
@@ -350,6 +352,7 @@ class QuestionCard {
       //   const initAddButton = document.getElementById('addquestionbutton-init');
       //   initAddButton.removeAttribute('disabled');
       //   initAddButton.style.visibility = 'visible';
+      await QuestionCard.updateQuestionLabel();
     })
 
     // tambah pertanyaan button
@@ -374,6 +377,7 @@ class QuestionCard {
       // console.log(arrofQuestionIds)
       // console.log(arrofArrOptionIds)
       // console.log(arrofQuestionIds);
+      await QuestionCard.updateQuestionLabel();
     })
 
     addButtonDiv.appendChild(addButton);
@@ -405,9 +409,32 @@ class QuestionCard {
       arrofQuestionIds.splice(globalArrayIndex, 1);
     }
   }
+
+  static async updateQuestionLabel(){
+    const selector = "label-pertanyaan";
+    const listofElementsToBeUpdated = document.querySelectorAll(`span[name=${selector}]`);
+    for (let i=0; i < listofElementsToBeUpdated.length; i++) {
+      const element = listofElementsToBeUpdated[i];
+      const questionNo = i + 1;
+      const stringQuestionNo = questionNo.toString(10);
+      element.textContent = `Pertanyaan ${stringQuestionNo}`;
+    }
+  }
 }
 
 class OptionButton{
+  static async updateOptionLabel(questionId) {
+    const questionIdString = questionId.toString(10);
+    const selector = `label-opsi-${questionIdString}`;
+    const listofElementsToBeUpdated = document.querySelectorAll(`span[name=${selector}]`);
+    for (let i=0; i < listofElementsToBeUpdated.length; i++) {
+      const element = listofElementsToBeUpdated[i];
+      const optionNo = i + 1;
+      const stringOptionNo = optionNo.toString(10);
+      element.textContent = `Opsi ${stringOptionNo}`;
+    }
+  }
+
   static async create(questionId){
     const div = document.createElement('div');
     div.setAttribute('id','optiondiv-'.concat(questionId.toString()));
@@ -424,6 +451,7 @@ class OptionButton{
     addOption.addEventListener('click', async() => {
       const optionDiv = optionObj.build();
       div.appendChild(optionDiv);
+      await OptionButton.updateOptionLabel(questionId);
     });
     return div;
   }
@@ -450,6 +478,33 @@ class Option{
     }
   }
 
+  static async createDynamicFlowDropDownList(idDropDownItem, questionId, buttonDiv, arrofQuestionIds){
+    const listOfItems = [];
+    const indexOfCurrentQuestionId = arrofQuestionIds.indexOf(questionId);
+    for (let i=indexOfCurrentQuestionId + 1; i<arrofQuestionIds.length; i++) {
+      const questionNo = i + 1;
+      const dropItem = document.createElement('a');
+      dropItem.setAttribute('name', idDropDownItem);
+      dropItem.setAttribute('class','dropdown-item');
+      dropItem.textContent = questionNo.toString(10);
+      dropItem.addEventListener('click', async() => {
+        await ButtonAction.dropDownAction(buttonDiv, dropItem, 'Jika dipilih opsi ini, pergi ke pertanyaan nomor?');
+      })
+      listOfItems.push(dropItem);
+    }
+    return listOfItems;
+  }
+
+  static async deletePrevDropItems(name) {
+    const listOfElementToBeDeleted = document.querySelectorAll(`a[name=${name}`); //returns a static Node List => document update doesn't affect collection elements
+    if (typeof listOfElementToBeDeleted[0] !== 'undefined') {
+      for (let i=0 ; i<listOfElementToBeDeleted.length; i++) {
+        const element = listOfElementToBeDeleted[i];
+        element.remove();
+      }
+    }
+  }
+
   build(){
     // description input
     this.addArray();
@@ -467,7 +522,9 @@ class Option{
     const descInputSpan = document.createElement('span');
     descInputSpan.setAttribute('class','input-group-text');
     descInputSpan.setAttribute('id','description-addon');
-    descInputSpan.setAttribute('style','width: 10rem;')
+    descInputSpan.setAttribute('style','width: 10rem;');
+    const questionIdString = this.questionId.toString(10);
+    descInputSpan.setAttribute('name',`label-opsi-${questionIdString}`);
     descInputSpan.textContent = 'Opsi';
     descInputPrepend.appendChild(descInputSpan);
 
@@ -486,6 +543,38 @@ class Option{
     descInputForm.setAttribute('aria-label',idInput);
     descInputForm.setAttribute('aria-describedby','description-addon');
     descInputGroup.appendChild(descInputForm);
+
+    // Flow logic definition by user using dynamic drop down list
+    const flowDiv = document.createElement('div');
+    flowDiv.setAttribute('class','dropdown mt-3 mx-auto');
+    divGroup.appendChild(flowDiv);
+    
+    const flowButton = document.createElement('button');
+    flowButton.setAttribute('class','btn btn-success dropdown-toggle');
+    const idFlow = 'mapping-'.concat(questionId.toString(),'-',optionId.toString());
+    flowButton.setAttribute('id',idFlow);
+    flowButton.setAttribute('type','button');
+    const defaultValue = 0;
+    flowButton.setAttribute('value',defaultValue.toString(10));
+    flowButton.setAttribute('data-toggle','dropdown');
+    flowButton.setAttribute('aria-haspopup','true');
+    flowButton.setAttribute('aria-expanded','false');
+    flowButton.textContent = 'Jika opsi ini dipilih, pergi ke pertanyaan nomor?'
+    flowDiv.appendChild(flowButton);
+
+    const flowDropList = document.createElement('div');
+    flowDropList.setAttribute('class','dropdown-menu');
+    flowDropList.setAttribute('aria-labelledby',idFlow);
+    flowDiv.appendChild(flowDropList);
+
+    flowButton.addEventListener('click', async () =>{
+      const idDropDownItem = 'mappingitem-'.concat(questionId.toString(),'-',optionId.toString());
+      await Option.deletePrevDropItems(idDropDownItem);
+      const flowDropItems = await Option.createDynamicFlowDropDownList(idDropDownItem, questionId, flowButton, arrofQuestionIds);
+      for (let i=0; i<flowDropItems.length; i++) {
+        flowDropList.appendChild(flowDropItems[i]);
+      }
+    });
 
     // score p
     const scoreLabel = document.createElement('p');
@@ -660,8 +749,56 @@ class ButtonAction{
         throw new Error(questionResponse.message);
       }
 
+      url = config.backURL.concat('private/optionstoquestionsmap');
+      const mappings = await ButtonAction.createMapping();
+      const mappingRequestObj = { questionnaire_id, mappings };
+      const mappingResponse = await FetchAPI.postJSON(url, mappingRequestObj, token);
+
+      if (!(mappingResponse.success)) {
+        throw new Error(mappingResponse.message);
+      }
+
       alert(questionResponse.message);
       
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  static async createMapping() {
+    try {
+      const mappings = [];
+
+      for (let i=0; i<arrofQuestionIds.length; i++) {
+        const questionId = i;
+        const questionIndex = arrofQuestionIds[i];
+        const questionIndexStr = questionIndex.toString(10);
+        let typeString = document.getElementById('type-'.concat(questionIndexStr)).value;
+        const type = await ButtonAction.typeStringMapper(typeString);
+
+        if ((type === 'checkbox') || (type === 'radio')) {
+          const optionList = arrofArrOptionIds[questionIndex];
+
+          for (let j=0; j<optionList.length; j++){
+            const optionId = j;
+            const optionIdStr = optionId.toString(10);
+            const mappingId = `mapping-${questionIndexStr}-${optionIdStr}`;
+            const dropFlowValue = document.getElementById(mappingId).value;
+            const dropFlowValueInt = parseInt(dropFlowValue, 10);
+            if (dropFlowValueInt !== 0) {
+              const mappingObj = {};
+              const questionIdDest = dropFlowValueInt - 1;
+              mappingObj.question_id = questionId;
+              mappingObj.option_id = optionId;
+              mappingObj.question_id_dest = questionIdDest;
+              mappings.push(mappingObj);
+            }
+          }   
+        }        
+      }
+      return mappings;
+
     } catch (error) {
       console.log(error);
       alert(error.message);
