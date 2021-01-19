@@ -266,7 +266,7 @@ class QuestionCard {
       if (DOMtodelete) {
         DOMtodelete.remove();
       }
-      optionButton = await OptionButton.create(parseInt(idValue));
+      optionButton = await OptionButton.create(parseInt(idValue), 'radio');
       cardBody.appendChild(optionButton);
     })
     typeDropList.appendChild(radioDropItem);
@@ -280,7 +280,7 @@ class QuestionCard {
       if (DOMtodelete) {
         DOMtodelete.remove();
       }
-      optionButton = await OptionButton.create(parseInt(idValue));
+      optionButton = await OptionButton.create(parseInt(idValue), 'checkbox');
       cardBody.appendChild(optionButton)
     })
     typeDropList.appendChild(checkboxDropItem);
@@ -435,7 +435,7 @@ class OptionButton{
     }
   }
 
-  static async create(questionId){
+  static async create(questionId, type){
     const div = document.createElement('div');
     div.setAttribute('id','optiondiv-'.concat(questionId.toString()));
     
@@ -449,7 +449,7 @@ class OptionButton{
 
     const optionObj = new Option(questionId);
     addOption.addEventListener('click', async() => {
-      const optionDiv = optionObj.build();
+      const optionDiv = optionObj.build(type);
       div.appendChild(optionDiv);
       await OptionButton.updateOptionLabel(questionId);
     });
@@ -505,7 +505,7 @@ class Option{
     }
   }
 
-  build(){
+  build(type){
     // description input
     this.addArray();
 
@@ -544,37 +544,39 @@ class Option{
     descInputForm.setAttribute('aria-describedby','description-addon');
     descInputGroup.appendChild(descInputForm);
 
-    // Flow logic definition by user using dynamic drop down list
-    const flowDiv = document.createElement('div');
-    flowDiv.setAttribute('class','dropdown mt-3 mx-auto');
-    divGroup.appendChild(flowDiv);
+    if (type === 'radio') {
+      // Flow logic definition by user using dynamic drop down list
+      const flowDiv = document.createElement('div');
+      flowDiv.setAttribute('class','dropdown mt-3 mx-auto');
+      divGroup.appendChild(flowDiv);
     
-    const flowButton = document.createElement('button');
-    flowButton.setAttribute('class','btn btn-success dropdown-toggle');
-    const idFlow = 'mapping-'.concat(questionId.toString(),'-',optionId.toString());
-    flowButton.setAttribute('id',idFlow);
-    flowButton.setAttribute('type','button');
-    const defaultValue = 0;
-    flowButton.setAttribute('value',defaultValue.toString(10));
-    flowButton.setAttribute('data-toggle','dropdown');
-    flowButton.setAttribute('aria-haspopup','true');
-    flowButton.setAttribute('aria-expanded','false');
-    flowButton.textContent = 'Jika opsi ini dipilih, pergi ke pertanyaan nomor?'
-    flowDiv.appendChild(flowButton);
+      const flowButton = document.createElement('button');
+      flowButton.setAttribute('class','btn btn-success dropdown-toggle');
+      const idFlow = 'mapping-'.concat(questionId.toString(),'-',optionId.toString());
+      flowButton.setAttribute('id',idFlow);
+      flowButton.setAttribute('type','button');
+      const defaultValue = 0;
+      flowButton.setAttribute('value',defaultValue.toString(10));
+      flowButton.setAttribute('data-toggle','dropdown');
+      flowButton.setAttribute('aria-haspopup','true');
+      flowButton.setAttribute('aria-expanded','false');
+      flowButton.textContent = 'Jika opsi ini dipilih, pergi ke pertanyaan nomor?'
+      flowDiv.appendChild(flowButton);
 
-    const flowDropList = document.createElement('div');
-    flowDropList.setAttribute('class','dropdown-menu');
-    flowDropList.setAttribute('aria-labelledby',idFlow);
-    flowDiv.appendChild(flowDropList);
+      const flowDropList = document.createElement('div');
+      flowDropList.setAttribute('class','dropdown-menu');
+      flowDropList.setAttribute('aria-labelledby',idFlow);
+      flowDiv.appendChild(flowDropList);
 
-    flowButton.addEventListener('click', async () =>{
-      const idDropDownItem = 'mappingitem-'.concat(questionId.toString(),'-',optionId.toString());
-      await Option.deletePrevDropItems(idDropDownItem);
-      const flowDropItems = await Option.createDynamicFlowDropDownList(idDropDownItem, questionId, flowButton, arrofQuestionIds);
-      for (let i=0; i<flowDropItems.length; i++) {
-        flowDropList.appendChild(flowDropItems[i]);
-      }
-    });
+      flowButton.addEventListener('click', async () =>{
+        const idDropDownItem = 'mappingitem-'.concat(questionId.toString(),'-',optionId.toString());
+        await Option.deletePrevDropItems(idDropDownItem);
+        const flowDropItems = await Option.createDynamicFlowDropDownList(idDropDownItem, questionId, flowButton, arrofQuestionIds);
+        for (let i=0; i<flowDropItems.length; i++) {
+          flowDropList.appendChild(flowDropItems[i]);
+        }
+      });
+    }
 
     // score p
     const scoreLabel = document.createElement('p');
@@ -777,7 +779,7 @@ class ButtonAction{
         let typeString = document.getElementById('type-'.concat(questionIndexStr)).value;
         const type = await ButtonAction.typeStringMapper(typeString);
 
-        if ((type === 'checkbox') || (type === 'radio')) {
+        if (type === 'radio') {
           const optionList = arrofArrOptionIds[questionIndex];
 
           for (let j=0; j<optionList.length; j++){
