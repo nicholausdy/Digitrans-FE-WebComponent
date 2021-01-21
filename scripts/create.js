@@ -663,6 +663,13 @@ class ButtonAction{
     buttonEl.textContent = baseText.concat('  ',value)
   }
 
+  static async deleteQuestionnaire(questionnaireId) {
+    const url = config.backURL.concat('private/deleteQuestionnaireById');
+    const data = {questionnaire_id: questionnaireId};
+    const token = localStorage.getItem('token');
+    const response = await FetchAPI.deleteJSON(url, data, token);
+  }
+
   static async submitAction() {
     try {
       const email = localStorage.getItem('email');
@@ -703,6 +710,7 @@ class ButtonAction{
         let isRequiredString = document.getElementById('isrequired-'.concat(questionIdStr)).value;
 
         if (!(question_description) || !(isRequiredString) || !(typeString)) {
+          await ButtonAction.deleteQuestionnaire(questionnaire_id);
           throw new Error('Ada isian yang belum diisi');
         }
 
@@ -729,6 +737,7 @@ class ButtonAction{
             const description = document.getElementById('option-'.concat(questionIdStr,'-',optionIdStr)).value;
             const score = document.getElementById('score-'.concat(questionIdStr,'-',optionIdStr)).value;
             if (!(score) || !(description)) {
+              await ButtonAction.deleteQuestionnaire(questionnaire_id);
               throw new Error('Ada isian yang belum diisi');
             }
             optionObj.description = description;
@@ -748,6 +757,7 @@ class ButtonAction{
       const questionResponse = await FetchAPI.postJSON(url, questionnaireObj, token);
 
       if (!(questionResponse.success)) {
+        await ButtonAction.deleteQuestionnaire(questionnaire_id);
         throw new Error(questionResponse.message);
       }
 
@@ -757,6 +767,7 @@ class ButtonAction{
       const mappingResponse = await FetchAPI.postJSON(url, mappingRequestObj, token);
 
       if (!(mappingResponse.success)) {
+        await ButtonAction.deleteQuestionnaire(questionnaire_id);
         throw new Error(mappingResponse.message);
       }
 
