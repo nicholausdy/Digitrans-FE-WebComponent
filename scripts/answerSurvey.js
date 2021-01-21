@@ -74,8 +74,11 @@ class AnswerPage extends HTMLElement{
 
       // const questionCardComp = QuestionCard.getCard(this.questions, this.mappings);
       // this.appendChild(questionCardComp);
-
-      const questionCardComp = QuestionCard.createQuestionCard(this, this.questions);
+      if (typeof responseMappingsArr[0] === 'undefined') {
+        QuestionCard.createQuestionCardNoMapping(this, this.questions);
+      } else {
+        QuestionCard.createQuestionCard(this, this.questions);
+      }
 
       // const submitButtonComp = SubmitButton.getButton();
       // this.appendChild(submitButtonComp);
@@ -326,6 +329,84 @@ class QuestionCard{
     }
   }
 }
+  static createQuestionCardNoMapping(parentDiv, questions) {
+    const questionNoString = questionNo.toString(10);
+    const cardContainer = document.createElement('div');
+    cardContainer.setAttribute('class','row mt-5 mx-auto');
+    cardContainer.setAttribute('id',`element-${questionNoString}`);
+
+    const card = document.createElement('div');
+    card.setAttribute('class','card mx-auto bg-dark');
+    card.setAttribute('style','width: 50rem;')
+    
+    cardContainer.appendChild(card);
+
+    const cardBody = document.createElement('div');
+    cardBody.setAttribute('class','card-body text-light');
+    
+    card.appendChild(cardBody);
+
+    const title = document.createElement('h6');
+    title.setAttribute('class','card-title');
+    const titleBoldStyle = document.createElement('b');
+    title.appendChild(titleBoldStyle);
+    titleBoldStyle.textContent = questions[questionNo].question_description;
+    cardBody.appendChild(title);
+
+    const required = document.createElement('h6');
+    required.setAttribute('class','card-subtitle mb-2 text-muted');
+    if (questions[questionNo].isrequired) {
+      required.innerHTML = ''.concat('<b>','Required','</b>');
+    } else {
+      required.innerHTML = ''.concat('<b>','Not Required','</b>');
+    }
+    cardBody.appendChild(required);
+
+    const idQuestion = questions[questionNo].question_id;
+
+    if (questions[questionNo].type === 'text') {
+        //input text 
+      const textInputRow = document.createElement('div');
+      textInputRow.setAttribute('class','row mt-3');
+
+      const textInputColumn = document.createElement('div');
+      textInputColumn.setAttribute('class','col w-100 mx-auto');
+
+      const textInputFormGroup = document.createElement('div');
+      textInputFormGroup.setAttribute('class','form-group w-100');
+
+      const textInputArea = document.createElement('input');
+      textInputArea.setAttribute('type','text');
+      textInputArea.setAttribute('class','form-control');
+      textInputArea.setAttribute('id','answer-'.concat(questionNoString));
+      textInputArea.setAttribute('required','');
+
+      textInputFormGroup.appendChild(textInputArea);
+      textInputColumn.appendChild(textInputFormGroup);
+      textInputRow.appendChild(textInputColumn);
+      cardBody.appendChild(textInputRow);
+    }
+
+    let optionsComponent;
+
+    if((questions[questionNo].type === 'checkbox') || (questions[questionNo].type === 'radio')) {
+      if (questions[questionNo].options.length > 0) {
+        optionsComponent = QuestionCard.createOptionsNoMapping(questions, idQuestion);
+        cardBody.appendChild(optionsComponent);
+      }
+    }
+
+    parentDiv.appendChild(cardContainer);
+
+    const maxQuestionNo = questions.length - 1; 
+    if (questionNo === maxQuestionNo) {
+      const submitButtonComp = SubmitButton.getButton();
+      parentDiv.appendChild(submitButtonComp);
+    } else {
+      questionNo++;
+      QuestionCard.createQuestionCardNoMapping(parentDiv, questions);
+    }
+  }
 
   // static getCard(questions){
   //   const questionCard = new QuestionCard(questions);
@@ -445,6 +526,37 @@ class QuestionCard{
     }
     arrofArrAllMappings[questionId] = singleQuestionMapping;
     return [div, isChosenIdMappingExist];
+  }
+
+  static createOptionsNoMapping(questions, questionId) {
+    const optionsList = questions[questionNo].options;
+    const type = questions[questionNo].type
+    const div = document.createElement('div');
+    for (let i = 0; i < optionsList.length; i++){
+      const option = document.createElement('div');
+      option.setAttribute('class','form-check');
+      const optionInput = document.createElement('input');
+      optionInput.setAttribute('class','form-check-input');
+      optionInput.setAttribute('type', type);
+      if (type === 'radio') {
+        optionInput.setAttribute('name','optionGroup-'.concat(questionId.toString()))
+      } 
+      optionInput.setAttribute('value','');
+      // optionInput.setAttribute('disabled','');
+      optionInput.setAttribute('id','option-'.concat(questionId.toString(),'-',optionsList[i].option_id.toString()));
+
+      option.appendChild(optionInput);
+
+      const optionLabel = document.createElement('label');
+      optionLabel.setAttribute('class','form-check-label');
+      optionLabel.setAttribute('for','option-'.concat(questionId.toString(),'-',optionsList[i].option_id.toString()));
+      optionLabel.textContent = optionsList[i].description;
+
+      option.appendChild(optionLabel);
+
+      div.appendChild(option);
+    }
+    return div;
   }
 }
 
