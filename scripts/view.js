@@ -9,6 +9,7 @@ class Questionnaire{
     try {
       const url1 = config.backURL.concat('public/getQuestionnaireById');
       const url2 = config.backURL.concat('private/getQuestions');
+      const url3 = config.backURL.concat('public/getOptionsToQuestionsMap');
       const questionnaireId = localStorage.getItem('viewId');
       const token = localStorage.getItem('token');
 
@@ -17,13 +18,14 @@ class Questionnaire{
       }
 
       const data = {questionnaire_id: questionnaireId};
-      const opA = FetchAPI.postJSON(url1, data, token);
-      const opB = FetchAPI.postJSON(url2, data, token);
+      const opA = FetchAPI.postJSON(url1, data);
+      const opB = FetchAPI.postJSON(url2, data);
+      const opC = FetchAPI.postJSON(url3, data);
 
-      const [responseQuestionnaire, responseQuestions] = await Promise.all([opA, opB]);
+      const [responseQuestionnaire, responseQuestions, responseMappings] = await Promise.all([opA, opB, opC]);
       
-      if ((responseQuestionnaire.success) && (responseQuestions.success)) {
-        return [responseQuestionnaire.message, responseQuestions.message.questions];
+      if ((responseQuestionnaire.success) && (responseQuestions.success) && (responseMappings.success)) {
+        return [responseQuestionnaire.message, responseQuestions.message.questions, responseMappings.message.mappings];
       } else {
         throw new Error('Failed in fetching data');
       }
@@ -55,7 +57,7 @@ class ViewPage extends HTMLElement{
     this.appendChild(navbar);
 
     (async() => {
-      [this.questionnaireInfo, this.questions] = await Questionnaire.getQuestionnaire();
+      [this.questionnaireInfo, this.questions, this.mappings] = await Questionnaire.getQuestionnaire();
       //console.log(this.questionnaireInfo);
       //console.log(this.questions);
       const titleCard = TitleCard.getCard(this.questionnaireInfo);
@@ -63,6 +65,9 @@ class ViewPage extends HTMLElement{
       if (this.questions.length > 0) {
         const questionCard = QuestionsCard.getCard(this.questions);
         this.appendChild(questionCard);
+      }
+      if (this.mappings.length > 0) {
+        await QuestionsCard.showMapping(this.mappings);
       }
     })();
   }
@@ -138,9 +143,16 @@ class QuestionsCard{
 
       const title = document.createElement('h6');
       title.setAttribute('class','card-title');
-      title.innerHTML = ''.concat('<b>',questions[i].question_description,'</b>');
       cardBody.appendChild(title);
-
+      const boldElement = document.createElement('b');
+      title.appendChild(boldElement);
+      const questionNo = questions[i].question_id + 1;
+      const questionNoString = questionNo.toString(10);
+      const questionDesc = questions[i].question_description;
+      const textDesc = `${questionNoString}. ${questionDesc}`;
+      boldElement.textContent = textDesc;
+      // title.innerHTML = ''.concat('<b>',questions[i].question_description,'</b>');
+      
       const required = document.createElement('h6');
       required.setAttribute('class','card-subtitle mb-2 text-muted');
       if (questions[i].isrequired) {
@@ -189,14 +201,31 @@ class QuestionsCard{
 
       const optionLabel = document.createElement('label');
       optionLabel.setAttribute('class','form-check-label');
-      optionLabel.setAttribute('for','option-'.concat(optionsList[i].option_id.toString()));
-      optionLabel.textContent = optionsList[i].description.concat(',  Score: ',optionsList[i].score.toString());
+      optionLabel.setAttribute('for','option-'.concat(questionId.toString(),'-',optionsList[i].option_id.toString()));
+      optionLabel.setAttribute('id','optiondesc-'.concat(questionId.toString(),'-',optionsList[i].option_id.toString()));
+      optionLabel.textContent = optionsList[i].description.concat(';  Score: ',optionsList[i].score.toString());
 
       option.appendChild(optionLabel);
 
       div.appendChild(option);
     }
     return div;
+  }
+
+  static async showMapping(mappingsList) {
+    for (let i=0 ; i < mappingsList.length; i++) {
+      const questionId = mappingsList[i].question_id;
+      const questionIdString = questionId.toString(10);
+      const optionId = mappingsList[i].option_id;
+      const optionIdString = optionId.toString(10);
+      const questionIdDest = mappingsList[i].question_id_dest + 1;
+      const questionIdDestString = questionIdDest.toString(10);
+
+      const idElem = `optiondesc-${questionIdString}-${optionIdString}`;
+      const optionLabelElement = document.getElementById(idElem);
+      const mappingDesc = `; Jika dipilih, pergi ke pertanyaan nomor ${questionIdDestString}`;
+      optionLabelElement.textContent = optionLabelElement.textContent.concat(mappingDesc);
+    }
   }
 }
 
