@@ -77,23 +77,42 @@ class AnalyticsButton{
     div.appendChild(paddingTop2);
 
     const buttonRow = document.createElement('div');
-    buttonRow.setAttribute('class','row mt-3');
+    buttonRow.setAttribute('class','row mt-3 w-50 ml-5');
     div.appendChild(buttonRow);
 
+    const paddingLeft = document.createElement('div');
+    paddingLeft.setAttribute('class', 'col-sm-1');
+    buttonRow.appendChild(paddingLeft)
+
     const buttonColumn = document.createElement('div');
-    buttonColumn.setAttribute('class', 'col-sm-10 mx-auto');
+    buttonColumn.setAttribute('class', 'col-sm-5');
 
     const button = document.createElement('button');
-    button.setAttribute('class','btn btn-success w-25');
+    button.setAttribute('class','btn btn-success w-100');
     button.setAttribute('type','button');
     button.setAttribute('id','submit');
-    button.textContent = 'Lihat Analytics';
+    button.textContent = 'Lihat Grafik';
     button.addEventListener('click', async() => {
-      await ButtonAction.viewAnalytics();
+      await ButtonAction.viewPage('analytics.html');
     });
 
     buttonColumn.appendChild(button);
     buttonRow.appendChild(buttonColumn);
+
+    const buttonColumnChi = document.createElement('div');
+    buttonColumnChi.setAttribute('class', 'col-sm-5');
+
+    const buttonChi = document.createElement('button');
+    buttonChi.setAttribute('class', 'btn btn-success w-100');
+    buttonChi.setAttribute('type','button');
+    buttonChi.setAttribute('id', 'submit-chi');
+    buttonChi.textContent = 'Uji Chi-squared';
+    buttonChi.addEventListener('click', async() => {
+      await ButtonAction.viewPage('chitest.html');
+    })
+
+    buttonColumnChi.appendChild(buttonChi);
+    buttonRow.appendChild(buttonColumnChi);
 
     this.button = div;
   }
@@ -195,17 +214,18 @@ class ButtonAction{
   static async viewDetail(answererEmail) {
     try {
       localStorage.setItem('answerer_email',answererEmail);
-      const destinationURL = await URLParser.redirectURL(window.location.href, 'detail.html');
-      window.location = destinationURL;
+      // const destinationURL = await URLParser.redirectURL(window.location.href, 'detail.html');
+      // window.location = destinationURL;
+      await ButtonAction.viewPage('detail.html');
     } catch (error) {
       console.log(error);
       alert(error.message);
     }
   }
 
-  static async viewAnalytics(){
+  static async viewPage(pageName){
     try {
-      const destinationURL = await URLParser.redirectURL(window.location.href, 'analytics.html');
+      const destinationURL = await URLParser.redirectURL(window.location.href, pageName);
       window.location = destinationURL;
     } catch (error) {
       console.log(error);

@@ -149,6 +149,8 @@ class AnalyticsCard{
   }
 }
 
+export { Questionnaire }
+
 customElements.define('analytics-page', AnalyticsPage);
 
 
