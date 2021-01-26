@@ -107,7 +107,14 @@ class AnalyticsCard{
 
       (async() => {
         if ((questions[i].type === 'checkbox') || (questions[i].type === 'radio')){
-          const chartComponent = await AnalyticsCard.createChart(questionnaire_id, questions[i].question_id);
+          const listOfChartTypes = ['Pie', 'Vertical bar', 'Horizontal bar'];
+          const questionId = questions[i].question_id;
+          const questionIdString = questionId.toString(10);
+          const chartReqObj = { questionnaire_id, question_id: questionId }
+          const dropDownList = DropDownList.getDropDownList(cardBody, chartReqObj ,questionIdString, 'Jenis grafik? Pie', listOfChartTypes);
+          cardBody.appendChild(dropDownList);
+
+          const chartComponent = await AnalyticsCard.createChart(questionnaire_id, questions[i].question_id, 'pie');
           cardBody.appendChild(chartComponent);
         }
       })();
@@ -122,16 +129,20 @@ class AnalyticsCard{
     return analyticsCard.card;
   }
 
-  static async createChart(questionnaire_id, question_id) {
+  static async createChart(questionnaire_id, question_id, chart_type) {
     try {
       const url = config.backURL.concat('private/getChart');
-      const data = {questionnaire_id: questionnaire_id, question_id: question_id}; 
+      const data = {questionnaire_id, question_id, chart_type}; 
       const token = localStorage.getItem('token');
 
       const headerInit = { headers: {"Content-Type": "image/svg+xml"}};
       const blobURL = await FetchAPI.getStream(url, data, headerInit, token);
 
       const fig = document.createElement('figure');
+      const questionIdString = question_id.toString(10);
+      const figureId = `chart-result-${questionIdString}`;
+      fig.setAttribute('id', figureId);
+
       const embed = document.createElement('embed');
       fig.appendChild(embed);
       embed.setAttribute('type','image/svg+xml');
@@ -146,6 +157,99 @@ class AnalyticsCard{
       console.log(error);
       alert(error.message);
     }
+  }
+}
+
+class DropDownList {
+  constructor(parentEl, chartReqObj, idEl, buttonText, listOfChartTypes) {
+    const dropDiv = document.createElement('div');
+    dropDiv.setAttribute('class','dropdown mt-3 mx-auto');
+    // cardBody.appendChild(questionDiv);
+    
+    const dropButton = document.createElement('button');
+    dropButton.setAttribute('class','btn btn-success dropdown-toggle');
+    const idDropButton = `question-chart-${idEl}`;
+    dropButton.setAttribute('id',idDropButton);
+    dropButton.setAttribute('type','button');
+    dropButton.setAttribute('data-toggle','dropdown');
+    dropButton.setAttribute('aria-haspopup','true');
+    dropButton.setAttribute('aria-expanded','false');
+    dropButton.textContent = buttonText;
+    dropDiv.appendChild(dropButton);
+
+    const dropList = document.createElement('div');
+    dropList.setAttribute('class','dropdown-menu');
+    dropList.setAttribute('aria-labelledby',idDropButton);
+    dropDiv.appendChild(dropList);
+
+    dropButton.addEventListener('click', async() => {
+      const idDropDownItem = `chart-items-${idEl}`;
+      await ButtonAction.deletePrevDropItems(idDropDownItem);
+      const dropItems = await ButtonAction.createDropDownList(parentEl, chartReqObj, idDropDownItem, listOfChartTypes, dropButton);
+      for (let i=0 ; i < dropItems.length; i++) {
+        dropList.appendChild(dropItems[i]);
+      }
+    });
+    this.dropDown = dropDiv;
+  }
+
+  static getDropDownList(parentEl, chartReqObj, idEl, buttonText, listOfChartTypes) {
+    const dropDownList = new DropDownList(parentEl, chartReqObj, idEl, buttonText, listOfChartTypes);
+    return dropDownList.dropDown;
+  }
+}
+
+class ButtonAction {
+  static async createDropDownList(parentEl, chartReqObj, idDropDownItem, listOfChartTypes, buttonDiv) {
+    const listOfDropItems = []
+    for (let i = 0; i < listOfChartTypes.length; i++) {
+      const dropItem = document.createElement('a');
+      dropItem.setAttribute('class','dropdown-item');
+      dropItem.setAttribute('name', idDropDownItem)
+      dropItem.textContent = listOfChartTypes[i];
+      dropItem.addEventListener('click', async() => {
+        await ButtonAction.dropDownAction(parentEl, chartReqObj, buttonDiv, 'Jenis grafik?', dropItem.textContent)
+      });
+      listOfDropItems.push(dropItem);
+    }
+    return listOfDropItems;
+  }
+
+  static async deletePrevDropItems(idDropDownItem) {
+    const listOfElementToBeDeleted = document.querySelectorAll(`a[name=${idDropDownItem}]`); //returns a static Node List => document update doesn't affect collection elements
+    if (typeof listOfElementToBeDeleted[0] !== 'undefined') {
+      for (let i=0 ; i<listOfElementToBeDeleted.length; i++) {
+        const element = listOfElementToBeDeleted[i];
+        element.remove();
+      }
+    }
+  }
+
+  static async dropDownAction(parentEl, chartReqObj, buttonEl, baseText, selectedText) {
+    const value = selectedText;
+    const { questionnaire_id, question_id } = chartReqObj;
+
+    buttonEl.setAttribute('value',value);
+    buttonEl.textContent = baseText.concat('  ',selectedText);
+    const idChart = `chart-result-${question_id}`;
+
+    const chartComponentToBeDeleted = document.getElementById(idChart);
+    if (chartComponentToBeDeleted) {
+      chartComponentToBeDeleted.remove()
+    }
+
+    const chartType = await ButtonAction.chartTypeMapper(value);
+    const chartComponent = await AnalyticsCard.createChart(questionnaire_id, question_id, chartType)
+    parentEl.appendChild(chartComponent);
+  }
+
+  static async chartTypeMapper(oldString) {
+    const selectorDict = {
+      'Pie': 'pie',
+      'Vertical bar': 'bar',
+      'Horizontal bar': 'h_bar'
+    }
+    return selectorDict[oldString];
   }
 }
 

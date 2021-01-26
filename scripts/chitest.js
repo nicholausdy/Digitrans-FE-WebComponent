@@ -300,8 +300,10 @@ class SubmitButton {
     buttonEl.addEventListener('click', async() => {
       await ButtonAction.deletePrevResultCard();
       const resultMessage = await ButtonAction.submitAction();
-      const resultCard = ResultCard.getCard(resultMessage);
-      parentDiv.appendChild(resultCard);
+      if (resultMessage) {
+        const resultCard = ResultCard.getCard(resultMessage);
+        parentDiv.appendChild(resultCard);
+      }
     });
     buttonContainer.appendChild(buttonEl);
     this.button = buttonContainer;
@@ -332,7 +334,7 @@ class ButtonAction {
   }
 
   static async deletePrevDropItems(idDropDownItem) {
-    const listOfElementToBeDeleted = document.querySelectorAll(`a[name=${idDropDownItem}`); //returns a static Node List => document update doesn't affect collection elements
+    const listOfElementToBeDeleted = document.querySelectorAll(`a[name=${idDropDownItem}]`); //returns a static Node List => document update doesn't affect collection elements
     if (typeof listOfElementToBeDeleted[0] !== 'undefined') {
       for (let i=0 ; i<listOfElementToBeDeleted.length; i++) {
         const element = listOfElementToBeDeleted[i];
