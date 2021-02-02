@@ -1,6 +1,7 @@
 import { config } from './util/config.js'
 import { FetchAPI } from './util/fetchAPI.js'
 import { URLParser } from './util/URLParser.js'
+import { NumberUtil } from './util/numberUtil.js'
 
 import { NavBar } from './components/navbar.js'
 import { Questionnaire } from './analytics.js'
@@ -173,6 +174,9 @@ class ChiTestCard {
     const depQuestionDiv = DropDownList.getDropDownList('dep','Variabel dependen yang dipilih:', questions);
     cardBody.appendChild(depQuestionDiv);
 
+    const confIntervalDiv = DropDownListNonQuestions.getDropDownListNonQuestions('conf', 'Tingkat kepercayaan:');
+    cardBody.appendChild(confIntervalDiv);
+
     const submitButton = SubmitButton.getButton(parentDiv);
     cardBody.appendChild(submitButton);
     
@@ -224,8 +228,49 @@ class DropDownList {
   }
 }
 
+class DropDownListNonQuestions {
+  constructor(idEl, buttonText) {
+    const dropDiv = document.createElement('div');
+    dropDiv.setAttribute('class','dropdown mt-3 mx-auto');
+    // cardBody.appendChild(questionDiv);
+    
+    const dropButton = document.createElement('button');
+    dropButton.setAttribute('class','btn btn-success dropdown-toggle');
+    const idDropButton = `${idEl}-question-button`;
+    dropButton.setAttribute('id',idDropButton);
+    dropButton.setAttribute('type','button');
+    dropButton.setAttribute('data-toggle','dropdown');
+    dropButton.setAttribute('aria-haspopup','true');
+    dropButton.setAttribute('aria-expanded','false');
+    dropButton.textContent = buttonText;
+    dropDiv.appendChild(dropButton);
+
+    const dropList = document.createElement('div');
+    dropList.setAttribute('class','dropdown-menu');
+    dropList.setAttribute('aria-labelledby',idDropButton);
+    dropDiv.appendChild(dropList);
+
+    dropButton.addEventListener('click', async() => {
+      const idDropDownItem = `${idEl}-question-items`;
+      await ButtonAction.deletePrevDropItems(idDropDownItem);
+      const listOfConfidenceInterval = ['80%', '85%', '90%', '95%', '99%'];
+      const dropItems = await ButtonAction.createDropDownListNonQuestions(idDropDownItem, listOfConfidenceInterval, dropButton, buttonText);
+      for (let i=0 ; i < dropItems.length; i++) {
+        dropList.appendChild(dropItems[i]);
+      }
+    });
+    this.dropDown = dropDiv;
+  }
+
+  static getDropDownListNonQuestions(idEl, buttonText) {
+    const dropDownList = new DropDownListNonQuestions(idEl, buttonText);
+    return dropDownList.dropDown;
+  }
+}
+
 class ResultCard {
   constructor(resultMessage) {
+    const { confIntervalNum, responseMessage} = resultMessage;
     const allCardsContainer = document.createElement('div');
     allCardsContainer.setAttribute('id', 'result-card')
 
@@ -256,28 +301,31 @@ class ResultCard {
 
     const conclusion = document.createElement('h6');
     conclusion.setAttribute('class','card-subtitle mb-2');
-    conclusion.innerHTML = `<b> Kesimpulan </b>: ${resultMessage.message}`;
+    conclusion.innerHTML = `<b> Kesimpulan </b>: ${responseMessage.message}`;
     cardBody.appendChild(conclusion);
 
-    if (resultMessage.success) {
+    if (responseMessage.success) {
       const p = document.createElement('h6');
       p.setAttribute('class','card-subtitle mb-2');
-      p.innerHTML = `<b> Nilai p </b> (kedua variabel berhubungan jika p < 0.05): ${resultMessage.detail.p}`;
+      const convertedPValue = NumberUtil.roundDecimal(responseMessage.detail.p, 3);
+      const pTestValue = NumberUtil.roundDecimal((1-confIntervalNum), 2);
+      p.innerHTML = `<b> Nilai p </b> (kedua variabel berhubungan jika p < ${pTestValue}): ${convertedPValue}`;
       cardBody.appendChild(p);
 
       const validity = document.createElement('h6');
       validity.setAttribute('class','card-subtitle mb-2');
-      validity.innerHTML = `<b> Catatan </b>: ${resultMessage.detail.validity}`;
+      validity.innerHTML = `<b> Catatan </b>: ${responseMessage.detail.validity}`;
       cardBody.appendChild(validity);
 
       const chi2 = document.createElement('h6');
       chi2.setAttribute('class','card-subtitle mb-2');
-      chi2.innerHTML = `<b> Nilai chi-squared </b>: ${resultMessage.detail.chi2}`;
+      const convertedChi2Value = NumberUtil.roundDecimal(responseMessage.detail.chi2, 3);
+      chi2.innerHTML = `<b> Nilai chi-squared </b>: ${convertedChi2Value}`;
       cardBody.appendChild(chi2);
 
       const dof = document.createElement('h6');
       dof.setAttribute('class','card-subtitle mb-2');
-      dof.innerHTML = `<b> Degree of freedom </b>: ${resultMessage.detail.dof}`;
+      dof.innerHTML = `<b> Degree of freedom </b>: ${responseMessage.detail.dof}`;
       cardBody.appendChild(dof);
     }
     
@@ -333,6 +381,32 @@ class ButtonAction {
     return listOfDropItems;
   }
 
+  static async createDropDownListNonQuestions(idDropDownItem, listOfItems, buttonDiv, buttonText) {
+    const listOfDropItems = []
+    for (let i = 0; i < listOfItems.length; i++) {
+      const dropItem = document.createElement('a');
+      dropItem.setAttribute('class','dropdown-item');
+      dropItem.setAttribute('name', idDropDownItem)
+      dropItem.textContent = listOfItems[i];
+      dropItem.addEventListener('click', async() => {
+        await ButtonAction.dropDownAction(listOfItems[i], buttonDiv, buttonText, dropItem.textContent)
+      });
+      listOfDropItems.push(dropItem);
+    }
+    return listOfDropItems;
+  }
+
+  static async confidenceIntervalValueMapping(baseValueStr) {
+    const mappingDict = {
+      '80%': 0.8,
+      '85%': 0.85,
+      '90%': 0.9,
+      '95%': 0.95,
+      '99%': 0.99,
+    };
+    return mappingDict[baseValueStr];
+  }
+
   static async deletePrevDropItems(idDropDownItem) {
     const listOfElementToBeDeleted = document.querySelectorAll(`a[name=${idDropDownItem}]`); //returns a static Node List => document update doesn't affect collection elements
     if (typeof listOfElementToBeDeleted[0] !== 'undefined') {
@@ -377,6 +451,12 @@ class ButtonAction {
       }
       const depQuestionId = parseInt(depQuestionIdString, 10);
 
+      const confIntervalString = document.getElementById('conf-question-button').value;
+      if (!(confIntervalString)) {
+        throw new Error('Ada isian yang belum diisi');
+      }
+      const confIntervalNum = await ButtonAction.confidenceIntervalValueMapping(confIntervalString);
+
       const url = config.backURL.concat('private/getStatistic');
     
       const token = localStorage.getItem('token');
@@ -389,10 +469,11 @@ class ButtonAction {
         questionnaire_id: questionnaireId, 
         ind_question_id: indQuestionId,
         dep_question_id: depQuestionId,
+        confidence_interval: confIntervalNum,
       };
 
       const responseMessage = await FetchAPI.postJSON(url, data, token);
-      return responseMessage;
+      return { confIntervalNum, responseMessage };
 
     } catch (error) {
       alert(error.message);
