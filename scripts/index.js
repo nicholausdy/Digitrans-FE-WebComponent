@@ -361,6 +361,17 @@ class TableofQuestionnaires{
       viewButtonCol.appendChild(viewButton);
       bodyRow.appendChild(viewButtonCol);
 
+      viewButtonCol = document.createElement('td');
+      viewButton = document.createElement('button');
+      viewButton.setAttribute('type','button');
+      viewButton.setAttribute('class','btn btn-success');
+      viewButton.textContent = 'Update';
+      viewButton.addEventListener('click', async() => {
+        await ButtonAction.updateQuestionnaire(this.responseMessage[i].QuestionnaireId);
+      })
+      viewButtonCol.appendChild(viewButton);
+      bodyRow.appendChild(viewButtonCol);
+
       responseButtonCol = document.createElement('td');
       responseButton = document.createElement('button');
       responseButton.setAttribute('type','button');
@@ -418,6 +429,17 @@ class ButtonAction{
     try {
       localStorage.setItem('viewId',questionnaireId);
       const destinationURL = await URLParser.redirectURL(window.location.href, 'view.html');
+      window.location = destinationURL;
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  static async updateQuestionnaire(questionnaireId) {
+    try {
+      localStorage.setItem('updateId',questionnaireId);
+      const destinationURL = await URLParser.redirectURL(window.location.href, 'update.html');
       window.location = destinationURL;
     } catch (error) {
       console.log(error);
