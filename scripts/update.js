@@ -62,16 +62,16 @@ class UpdatePage extends HTMLElement {
 
     (async() => {
       [this.questionnaireInfo, this.questions, this.mappings] = await QuestionnaireDetail.getQuestionnaire();
-      console.log(this.questions);
-      await Init.initGlobals(this.questions);
-      console.log(arrofQuestionIds);
-      console.log(arrofArrOptionIds);
-      console.log(lastId);
+      if (typeof this.questions !== 'undefined') {
+        await Init.initGlobals(this.questions);
+      }
 
       const titleCard = TitleCard.getCard(this.questionnaireInfo);
       this.appendChild(titleCard);
 
-      await Init.initQuestionCards(this, this.questions, this.mappings);
+      if (typeof this.questions !== 'undefined') {
+        await Init.initQuestionCards(this, this.questions, this.mappings);
+      }
 
       const submitButton = SubmitButton.getButton();
       this.appendChild(submitButton);
