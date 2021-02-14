@@ -62,14 +62,12 @@ class UpdatePage extends HTMLElement {
 
     (async() => {
       [this.questionnaireInfo, this.questions, this.mappings] = await QuestionnaireDetail.getQuestionnaire();
-      if (typeof this.questions !== 'undefined') {
-        await Init.initGlobals(this.questions);
-      }
-
+      
       const titleCard = TitleCard.getCard(this.questionnaireInfo);
       this.appendChild(titleCard);
 
       if (typeof this.questions !== 'undefined') {
+        await Init.initGlobals(this.questions);
         await Init.initQuestionCards(this, this.questions, this.mappings);
       }
 
