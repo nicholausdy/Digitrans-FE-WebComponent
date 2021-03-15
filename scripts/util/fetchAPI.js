@@ -18,6 +18,27 @@ class FetchAPI {
     }
   } 
 
+  static async postAndDownload(url, data, token = "", filename, type) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '.concat(token)
+        },
+        body: JSON.stringify(data)
+      });
+
+      const binaryResponse = await response.blob();
+      const file = new File([binaryResponse], filename, { type })
+      const objectURL = URL.createObjectURL(file);
+      window.open(objectURL, '_self');
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   static async deleteJSON (url, data, token = "") {
     try {
       const response = await fetch(url, {

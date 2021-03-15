@@ -84,8 +84,9 @@ class AnalyticsButton{
     paddingLeft.setAttribute('class', 'col-sm-1');
     buttonRow.appendChild(paddingLeft)
 
+    // Lihat Grafik button
     const buttonColumn = document.createElement('div');
-    buttonColumn.setAttribute('class', 'col-sm-5');
+    buttonColumn.setAttribute('class', 'col-sm-3');
 
     const button = document.createElement('button');
     button.setAttribute('class','btn btn-success w-100');
@@ -99,8 +100,9 @@ class AnalyticsButton{
     buttonColumn.appendChild(button);
     buttonRow.appendChild(buttonColumn);
 
+    // Uji Chi Squared button
     const buttonColumnChi = document.createElement('div');
-    buttonColumnChi.setAttribute('class', 'col-sm-5');
+    buttonColumnChi.setAttribute('class', 'col-sm-3');
 
     const buttonChi = document.createElement('button');
     buttonChi.setAttribute('class', 'btn btn-success w-100');
@@ -113,6 +115,48 @@ class AnalyticsButton{
 
     buttonColumnChi.appendChild(buttonChi);
     buttonRow.appendChild(buttonColumnChi);
+
+    // Download spreadsheet dropdown
+    const downloadColumn = document.createElement('div');
+    downloadColumn.setAttribute('class', 'col-sm-3')
+
+    const downloadEl = document.createElement('div');
+    downloadEl.setAttribute('class','dropdown');
+    
+    const downloadButton = document.createElement('button');
+    downloadButton.setAttribute('class','btn btn-success dropdown-toggle');
+    downloadButton.setAttribute('type','button');
+    const idDownload = 'download';
+    downloadButton.setAttribute('id',idDownload);
+    downloadButton.setAttribute('data-toggle','dropdown');
+    downloadButton.setAttribute('aria-haspopup','true');
+    downloadButton.setAttribute('aria-expanded','false');
+    downloadButton.textContent = 'Unduh sebagai spreadsheet'
+    downloadEl.appendChild(downloadButton);
+
+    const downloadDropList = document.createElement('div');
+    downloadDropList.setAttribute('class','dropdown-menu');
+    downloadDropList.setAttribute('aria-labelledby',idDownload);
+    downloadEl.appendChild(downloadDropList);
+
+    const csvDropItem = document.createElement('a');
+    csvDropItem.setAttribute('class','dropdown-item');
+    csvDropItem.textContent = 'CSV';
+    csvDropItem.addEventListener('click', async() => {
+      await ButtonAction.downloadSpreadsheet('csv');
+    })
+    downloadDropList.appendChild(csvDropItem);
+
+    const excelDropItem = document.createElement('a');
+    excelDropItem.setAttribute('class','dropdown-item');
+    excelDropItem.textContent = 'Excel';
+    excelDropItem.addEventListener('click', async() => {
+      await ButtonAction.downloadSpreadsheet('xlsx');
+    })
+    downloadDropList.appendChild(excelDropItem);
+    
+    downloadColumn.appendChild(downloadEl);
+    buttonRow.appendChild(downloadColumn);
 
     this.button = div;
   }
@@ -227,6 +271,26 @@ class ButtonAction{
     try {
       const destinationURL = await URLParser.redirectURL(window.location.href, pageName);
       window.location = destinationURL;
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  static async downloadSpreadsheet(format){
+    try {
+      const url = config.backURL.concat('private/getSpreadsheet');
+      const token = localStorage.getItem('token');
+      const questionnaire_id = localStorage.getItem('viewResponseId');
+      const data = {questionnaire_id, format};
+
+      const filename = `response-spreadsheet.${format}`
+      const mimeType = {
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        csv: 'text/csv',
+      }
+      await FetchAPI.postAndDownload(url, data, token, filename, mimeType[format]);
+      
     } catch (error) {
       console.log(error);
       alert(error.message);
