@@ -53,7 +53,7 @@ class ViewPage extends HTMLElement{
     this.appendChild(link);
 
     //navbar
-    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Langganan','Ganti akun'],['index.html','create.html','subscription.html','login.html'], 'Kuesioner');
+    const navbar = NavBar.getNavBar('Digitrans',['Kuesioner','Buat','Kalkulator sampel','Langganan','Ganti akun'],['index.html','create.html','sample.html','subscription.html','login.html'], 'Kuesioner');
     this.appendChild(navbar);
 
     (async() => {
