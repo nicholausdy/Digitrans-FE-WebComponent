@@ -313,7 +313,12 @@ class TableofQuestionnaires{
       let descriptionCol;
       let idCol;
       let dateCol;
-      let buttonCol;
+      let actionDiv;
+      let actionList;
+      let actionDropList;
+      let actionCol;  
+      let updateButton;
+      let shareButton;
       let deleteButton;
       let viewButtonCol;
       let viewButton;
@@ -338,36 +343,63 @@ class TableofQuestionnaires{
       dateCol.textContent = this.responseMessage[i].CreatedAt;
       bodyRow.appendChild(dateCol);
 
-      buttonCol = document.createElement('td');
-      deleteButton = document.createElement('button');
-      // deleteButton.setAttribute('id',this.responseMessage[i].QuestionnaireId);
-      deleteButton.setAttribute('type','button');
-      deleteButton.setAttribute('class','btn btn-danger');
+      //Aksi drop down
+      actionCol = document.createElement('td');
+      actionDiv = document.createElement('div');
+      actionCol.appendChild(actionDiv);
+      actionDiv.setAttribute('class','dropdown mt-3');
+      bodyRow.appendChild(actionDiv);
+    
+      actionList = document.createElement('button');
+      actionList.setAttribute('class','btn btn-success dropdown-toggle');
+      const idAction = 'action-'.concat(this.responseMessage.questionnaireId);
+      actionList.setAttribute('id',idAction);
+      actionList.setAttribute('type','button');
+      actionList.setAttribute('data-toggle','dropdown');
+      actionList.setAttribute('aria-haspopup','true');
+      actionList.setAttribute('aria-expanded','false');
+      actionList.textContent = 'Aksi'
+      actionDiv.appendChild(actionList);
+
+      actionDropList = document.createElement('div');
+      actionDropList.setAttribute('class','dropdown-menu');
+      actionDropList.setAttribute('aria-labelledby',idAction);
+      actionList.appendChild(actionDropList);
+
+      // Update drop button
+      updateButton = document.createElement('a');
+      updateButton.setAttribute('class','dropdown-item');
+      updateButton.textContent = 'Update';
+      updateButton.addEventListener('click', async() => {
+        await ButtonAction.updateQuestionnaire(this.responseMessage[i].QuestionnaireId);
+      })
+      actionDropList.appendChild(updateButton);
+
+      // Share drop button
+      shareButton = document.createElement('a');
+      shareButton.setAttribute('class','dropdown-item');
+      shareButton.textContent = 'Share';
+      shareButton.addEventListener('click', async() => {
+        await ButtonAction.shareQuestionnaire(this.responseMessage[i].QuestionnaireId, this.responseMessage[i].QuestionnaireTitle);
+      })
+      actionDropList.appendChild(shareButton);
+
+      // Delete drop button
+      deleteButton = document.createElement('a');
+      deleteButton.setAttribute('class','dropdown-item');
       deleteButton.textContent = 'Hapus';
-      deleteButton.addEventListener("click", async() => {
+      deleteButton.addEventListener('click', async() => {
         await ButtonAction.deleteQuestionnaire(this.responseMessage[i].QuestionnaireId, this.responseMessage[i].QuestionnaireTitle);
       })
-      buttonCol.appendChild(deleteButton);
-      bodyRow.appendChild(buttonCol);
+      actionDropList.appendChild(deleteButton);
 
       viewButtonCol = document.createElement('td');
       viewButton = document.createElement('button');
       viewButton.setAttribute('type','button');
-      viewButton.setAttribute('class','btn btn-success');
-      viewButton.textContent = 'Lihat';
+      viewButton.setAttribute('class','btn btn-success mt-1');
+      viewButton.textContent = 'Preview';
       viewButton.addEventListener('click', async() => {
         await ButtonAction.viewQuestionnaire(this.responseMessage[i].QuestionnaireId);
-      })
-      viewButtonCol.appendChild(viewButton);
-      bodyRow.appendChild(viewButtonCol);
-
-      viewButtonCol = document.createElement('td');
-      viewButton = document.createElement('button');
-      viewButton.setAttribute('type','button');
-      viewButton.setAttribute('class','btn btn-success');
-      viewButton.textContent = 'Update';
-      viewButton.addEventListener('click', async() => {
-        await ButtonAction.updateQuestionnaire(this.responseMessage[i].QuestionnaireId);
       })
       viewButtonCol.appendChild(viewButton);
       bodyRow.appendChild(viewButtonCol);
@@ -375,7 +407,7 @@ class TableofQuestionnaires{
       responseButtonCol = document.createElement('td');
       responseButton = document.createElement('button');
       responseButton.setAttribute('type','button');
-      responseButton.setAttribute('class','btn btn-success');
+      responseButton.setAttribute('class','btn btn-success mt-1');
       responseButton.textContent = 'Respon';
       responseButton.addEventListener('click', async() => {
         await ButtonAction.viewResponse(this.responseMessage[i].QuestionnaireId);
@@ -440,6 +472,18 @@ class ButtonAction{
     try {
       localStorage.setItem('updateId',questionnaireId);
       const destinationURL = await URLParser.redirectURL(window.location.href, 'update.html');
+      window.location = destinationURL;
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  static async shareQuestionnaire(questionnaireId, questionnaireTitle) {
+    try {
+      localStorage.setItem('shareId', questionnaireId);
+      localStorage.setItem('shareTitle',questionnaireTitle);
+      const destinationURL = await URLParser.redirectURL(window.location.href, 'share.html');
       window.location = destinationURL;
     } catch (error) {
       console.log(error);
