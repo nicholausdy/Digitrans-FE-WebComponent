@@ -6,6 +6,8 @@ import { NavBar } from './components/navbar.js'
 import { Questionnaire } from './analytics.js'
 import { TitleCard } from './view.js'
 
+const listOfAvailableQuestions = [];
+
 class CronbachPage extends HTMLElement {
   constructor(){
     super();
@@ -138,52 +140,82 @@ class CronbachRequestCard{
     description.textContent = 'Pertanyaan pada kuesioner ini yang dapat dianalisis adalah sebagai berikut (bertipe radio dan wajib diisi):';
     cardBody.appendChild(description);
 
-    for(let i = 0; i < questions.length; i++) {
+    // for(let i = 0; i < questions.length; i++) {
+    //   if ((questions[i].type === 'radio') && (questions[i].isrequired)) {
+    //     const descriptionI = document.createElement('h6');
+    //     descriptionI.setAttribute('class','card-subtitle mb-2');
+    //     descriptionI.textContent = `${questions[i].question_id + 1}. ${questions[i].question_description}`;
+    //     cardBody.appendChild(descriptionI);
+    //   }
+    // }
+    const optionsDiv = document.createElement('div');
+    for (let i=0; i < questions.length; i++) {
       if ((questions[i].type === 'radio') && (questions[i].isrequired)) {
-        const descriptionI = document.createElement('h6');
-        descriptionI.setAttribute('class','card-subtitle mb-2');
-        descriptionI.textContent = `${questions[i].question_id + 1}. ${questions[i].question_description}`;
-        cardBody.appendChild(descriptionI);
+        const option = document.createElement('div');
+        option.setAttribute('class','form-check');
+
+        const optionInput = document.createElement('input');
+        optionInput.setAttribute('class','form-check-input');
+        optionInput.setAttribute('type', 'checkbox');
+        optionInput.setAttribute('name','questionsGroup')
+        optionInput.setAttribute('value','');
+      // optionInput.setAttribute('disabled','');
+        const questionId = questions[i].question_id;
+        optionInput.setAttribute('id',`questionid-${questionId}`);
+
+        option.appendChild(optionInput);
+
+        const optionLabel = document.createElement('label');
+        optionLabel.setAttribute('class','form-check-label');
+        optionLabel.setAttribute('for',`questionid-${questionId}`);
+        optionLabel.setAttribute('id',`questiondesc-${questionId}`);
+        optionLabel.textContent = `${questions[i].question_id + 1}. ${questions[i].question_description}`;
+
+        option.appendChild(optionLabel);
+        optionsDiv.appendChild(option);
+        listOfAvailableQuestions.push(questionId);
       }
     }
 
-    const descriptionPad = document.createElement('h6');
-    descriptionPad.setAttribute('class','card-subtitle mb-2');
-    descriptionPad.innerHTML = '</br>'
-    cardBody.appendChild(descriptionPad);
+    cardBody.appendChild(optionsDiv);
 
-    const descriptionInput = document.createElement('h6');
-    descriptionInput.setAttribute('class','card-subtitle mb-2');
-    descriptionInput.textContent = 'Masukkan nomor pertanyaan yang akan dianalisis (pisahkan dengan koma dan tanpa spasi)';
-    cardBody.appendChild(descriptionInput);
+    // const descriptionPad = document.createElement('h6');
+    // descriptionPad.setAttribute('class','card-subtitle mb-2');
+    // descriptionPad.innerHTML = '</br>'
+    // cardBody.appendChild(descriptionPad);
 
-    // Input Form
-    const descInputGroup = document.createElement('div');
-    descInputGroup.setAttribute('class','input-group sm-6 mt-3');
-    cardBody.appendChild(descInputGroup);
+    // const descriptionInput = document.createElement('h6');
+    // descriptionInput.setAttribute('class','card-subtitle mb-2');
+    // descriptionInput.textContent = 'Masukkan nomor pertanyaan yang akan dianalisis (pisahkan dengan koma dan tanpa spasi)';
+    // cardBody.appendChild(descriptionInput);
 
-    const descInputPrepend = document.createElement('div');
-    descInputPrepend.setAttribute('class','input-group-prepend');
-    descInputGroup.appendChild(descInputPrepend);
+    // // Input Form
+    // const descInputGroup = document.createElement('div');
+    // descInputGroup.setAttribute('class','input-group sm-6 mt-3');
+    // cardBody.appendChild(descInputGroup);
 
-    const descInputSpan = document.createElement('span');
-    descInputSpan.setAttribute('class','input-group-text');
-    descInputSpan.setAttribute('id','description-addon');
-    descInputSpan.setAttribute('style','width: 10rem;')
-    descInputSpan.setAttribute('name','label-teks')
-    descInputSpan.textContent = 'Masukkan nomor';
-    descInputPrepend.appendChild(descInputSpan);
+    // const descInputPrepend = document.createElement('div');
+    // descInputPrepend.setAttribute('class','input-group-prepend');
+    // descInputGroup.appendChild(descInputPrepend);
 
-    const descInputForm = document.createElement('textarea');
-    const idQuestionList = 'questions-list'
-    descInputForm.setAttribute('id', idQuestionList);
-    descInputForm.setAttribute('rows', '7');
-    descInputForm.setAttribute('cols', '80');
-    descInputForm.setAttribute('class','form-control');
-    descInputForm.setAttribute('aria-label','description');
-    descInputForm.setAttribute('aria-describedby','description-addon');
-    descInputForm.setAttribute('placeholder','2,3,4,5')
-    descInputGroup.appendChild(descInputForm);
+    // const descInputSpan = document.createElement('span');
+    // descInputSpan.setAttribute('class','input-group-text');
+    // descInputSpan.setAttribute('id','description-addon');
+    // descInputSpan.setAttribute('style','width: 10rem;')
+    // descInputSpan.setAttribute('name','label-teks')
+    // descInputSpan.textContent = 'Masukkan nomor';
+    // descInputPrepend.appendChild(descInputSpan);
+
+    // const descInputForm = document.createElement('textarea');
+    // const idQuestionList = 'questions-list'
+    // descInputForm.setAttribute('id', idQuestionList);
+    // descInputForm.setAttribute('rows', '7');
+    // descInputForm.setAttribute('cols', '80');
+    // descInputForm.setAttribute('class','form-control');
+    // descInputForm.setAttribute('aria-label','description');
+    // descInputForm.setAttribute('aria-describedby','description-addon');
+    // descInputForm.setAttribute('placeholder','2,3,4,5')
+    // descInputGroup.appendChild(descInputForm);
 
     // submit button
     const submitButton = SubmitButton.getButton(parentDiv);
@@ -290,21 +322,35 @@ class ButtonAction {
   }
 
   static async getQuestionsList(){
+    // try {
+    //   const questionsListElem = document.getElementById('questions-list');
+    //   const stringValue = questionsListElem.value;
+    //   if (!(stringValue)) {
+    //     throw new Error('Isian kosong')
+    //   }
+    //   const stringArr = stringValue.split(",");
+    //   const questionsIdList = [];
+    //   for (let i = 0 ; i < stringArr.length; i++) {
+    //     const stringElem = stringArr[i];
+    //     const intElem = parseInt(stringElem, 10);
+    //     if (isNaN(intElem)) {
+    //       throw new Error('Isian tidak valid')
+    //     }
+    //     questionsIdList.push(intElem - 1);
+    //   }
+    //   return questionsIdList;
+    // } catch (error) {
+    //   throw new Error(error.message);
+    // }
     try {
-      const questionsListElem = document.getElementById('questions-list');
-      const stringValue = questionsListElem.value;
-      if (!(stringValue)) {
-        throw new Error('Isian kosong')
-      }
-      const stringArr = stringValue.split(",");
       const questionsIdList = [];
-      for (let i = 0 ; i < stringArr.length; i++) {
-        const stringElem = stringArr[i];
-        const intElem = parseInt(stringElem, 10);
-        if (isNaN(intElem)) {
-          throw new Error('Isian tidak valid')
+      for (let i = 0; i < listOfAvailableQuestions.length; i++){
+        const optionElem = document.getElementById(`questionid-${listOfAvailableQuestions[i]}`);
+        if (optionElem) {
+          if (optionElem.checked) {
+            questionsIdList.push(listOfAvailableQuestions[i])
+          }
         }
-        questionsIdList.push(intElem - 1);
       }
       return questionsIdList;
     } catch (error) {
@@ -321,7 +367,7 @@ class ButtonAction {
       }
 
       const questionsIdList = await ButtonAction.getQuestionsList();
-
+      
       const url = config.backURL.concat('private/getCronbachAlpha');
 
       const token = localStorage.getItem('token');
