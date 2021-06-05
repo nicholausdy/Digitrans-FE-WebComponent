@@ -77,7 +77,7 @@ class AnalyticsButton{
     div.appendChild(paddingTop2);
 
     const buttonRow = document.createElement('div');
-    buttonRow.setAttribute('class','row mt-3 w-50 ml-5');
+    buttonRow.setAttribute('class','row mt-3 w-52 ml-5');
     div.appendChild(buttonRow);
 
     const paddingLeft = document.createElement('div');
@@ -86,7 +86,7 @@ class AnalyticsButton{
 
     // Lihat Grafik button
     const buttonColumn = document.createElement('div');
-    buttonColumn.setAttribute('class', 'col-sm-3');
+    buttonColumn.setAttribute('class', 'col-sm-2');
 
     const button = document.createElement('button');
     button.setAttribute('class','btn btn-success w-100');
@@ -102,7 +102,7 @@ class AnalyticsButton{
 
     // Uji Chi Squared button
     const buttonColumnChi = document.createElement('div');
-    buttonColumnChi.setAttribute('class', 'col-sm-3');
+    buttonColumnChi.setAttribute('class', 'col-sm-2');
 
     const buttonChi = document.createElement('button');
     buttonChi.setAttribute('class', 'btn btn-success w-100');
@@ -116,9 +116,25 @@ class AnalyticsButton{
     buttonColumnChi.appendChild(buttonChi);
     buttonRow.appendChild(buttonColumnChi);
 
+    //Uji Cronbach Alpha button
+    const buttonColumnCronbach = document.createElement('div');
+    buttonColumnCronbach.setAttribute('class', 'col-sm-2');
+
+    const buttonCronbach = document.createElement('button');
+    buttonCronbach.setAttribute('class', 'btn btn-success w-100');
+    buttonCronbach.setAttribute('type','button');
+    buttonCronbach.setAttribute('id', 'submit-cronbach');
+    buttonCronbach.textContent = 'Uji Cronbach Alpha';
+    buttonCronbach.addEventListener('click', async() => {
+      await ButtonAction.viewPage('cronbach.html');
+    })
+
+    buttonColumnCronbach.appendChild(buttonCronbach);
+    buttonRow.appendChild(buttonColumnCronbach);
+
     // Download spreadsheet dropdown
     const downloadColumn = document.createElement('div');
-    downloadColumn.setAttribute('class', 'col-sm-3')
+    downloadColumn.setAttribute('class', 'col-sm-2')
 
     const downloadEl = document.createElement('div');
     downloadEl.setAttribute('class','dropdown');
