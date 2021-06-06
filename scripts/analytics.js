@@ -3,7 +3,7 @@ import { FetchAPI } from './util/fetchAPI.js'
 import { URLParser } from './util/URLParser.js'
 
 import { NavBar } from './components/navbar.js'
-import { TitleCard } from './view.js'
+// import { TitleCard } from './view.js'
 
 class Questionnaire{
   static async getQuestionnaire(){
@@ -65,6 +65,59 @@ class AnalyticsPage extends HTMLElement {
       const analyticsCard = AnalyticsCard.getCard(this.questionnaire_id, this.questions);
       this.appendChild(analyticsCard);
     })();
+  }
+}
+
+class TitleCard {
+  constructor(questionnaireInfo){
+    const cardContainerTop = document.createElement('div');
+    cardContainerTop.setAttribute('class','row mt-5 mx-auto');
+
+    const cardContainer = document.createElement('div');
+    cardContainer.setAttribute('class','row mt-5 mx-auto');
+
+    cardContainerTop.append(cardContainer);
+
+    //const cardContainerCol= document.createElement('div');
+    //cardContainerCol.setAttribute('class','col sm-8');
+
+    // cardContainer.appendChild(cardContainerCol);
+
+    const card = document.createElement('div');
+    card.setAttribute('class','card mx-auto bg-dark');
+    card.setAttribute('style','width: 50rem;')
+    
+    cardContainer.appendChild(card);
+
+    const cardBody = document.createElement('div');
+    cardBody.setAttribute('class','card-body text-light');
+    
+    card.appendChild(cardBody);
+
+    const title = document.createElement('h5');
+    title.setAttribute('class','card-title');
+    const titleBoldStyle = document.createElement('b');
+    title.appendChild(titleBoldStyle);
+    titleBoldStyle.textContent =  questionnaireInfo.QuestionnaireTitle;
+    cardBody.appendChild(title);
+
+    const description = document.createElement('h6');
+    description.setAttribute('class','card-subtitle mb-2 text-muted');
+    const descriptionBoldStyle = document.createElement('b');
+    description.appendChild(descriptionBoldStyle);
+    descriptionBoldStyle.textContent = questionnaireInfo.QuestionnaireDescription;
+    cardBody.appendChild(description);
+
+    // submit button
+    const submitButton = SubmitButton.getButton();
+    cardBody.appendChild(submitButton);
+
+    this.card = cardContainerTop;
+  }
+
+  static getCard(questionnaireInfo){
+    const titleCard = new TitleCard(questionnaireInfo);
+    return titleCard.card;
   }
 }
 
@@ -250,6 +303,26 @@ class ButtonAction {
       'Horizontal bar': 'h_bar'
     }
     return selectorDict[oldString];
+  }
+}
+
+class SubmitButton {
+  constructor() {
+    const buttonContainer = document.createElement('div');
+    const buttonEl = document.createElement('button');
+    buttonEl.setAttribute('type','button');
+    buttonEl.setAttribute('class','btn btn-success mt-3');
+    buttonEl.textContent = 'Generate PDF';
+    buttonEl.addEventListener('click', async() => {
+      window.print();
+    });
+    buttonContainer.appendChild(buttonEl);
+    this.button = buttonContainer;
+  }
+
+  static getButton() {
+    const submitButton = new SubmitButton();
+    return submitButton.button;
   }
 }
 
